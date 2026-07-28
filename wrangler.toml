@@ -19,4 +19,4 @@ globs = ["**/*.wasm"]
 type = "CompiledWasm"
 
 # read more about configuring your Worker via wrangler.toml at:
-# https://developers.cloudflare.com/workers/cli-wrangler/configuration
+# https://cloud-mail.greatsmart1.workers.dev
