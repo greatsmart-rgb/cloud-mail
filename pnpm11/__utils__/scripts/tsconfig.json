@@ -1,0 +1,19 @@
+{
+  "extends": "@pnpm/tsconfig",
+  "compilerOptions": {
+    "outDir": "lib",
+    "rootDir": "src"
+  },
+  "include": [
+    "src/**/*.ts",
+    "../../__typings__/**/*.d.ts"
+  ],
+  "references": [
+    {
+      "path": "../../workspace/projects-reader"
+    },
+    {
+      "path": "../../workspace/workspace-manifest-reader"
+    }
+  ]
+}
