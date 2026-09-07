@@ -83,3 +83,6 @@ binding = "AI"
 # [[env.production.kv_namespaces]]
 # binding = "MY_KV_NAMESPACE"
 # id = "<PRODUCTION_NAMESPACE_ID>"
+
+# mail-worker/wrangler.toml
+name = 'cloud-mail'
