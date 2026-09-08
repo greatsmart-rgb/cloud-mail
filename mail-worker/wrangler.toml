@@ -1,5 +1,5 @@
 #:schema node_modules/wrangler/config-schema.json
-name = "ai-assistant"
+name = "cloud-mail"
 compatibility_date = "2024-05-02"
 pages_build_output_dir = "./dist"
 
@@ -83,6 +83,3 @@ binding = "AI"
 # [[env.production.kv_namespaces]]
 # binding = "MY_KV_NAMESPACE"
 # id = "<PRODUCTION_NAMESPACE_ID>"
-
-# mail-worker/wrangler.toml
-name = 'cloud-mail'
