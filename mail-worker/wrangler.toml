@@ -29,7 +29,7 @@ enabled = true
 
 #[[kv_namespaces]]
 #binding = "kv"			# KV binding (do not change)
-#id = ""				# Your KV namespace ID
+#id = "f15aada5480f457bbc1e849b0cea4ebe"				# Your KV namespace ID
 
 #[[r2_buckets]]
 #binding = "r2"			# R2 binding (do not change)
