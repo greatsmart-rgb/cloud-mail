@@ -29,6 +29,14 @@ const s3Service = {
 		await client.send(new PutObjectCommand(obj))
 	},
 
+	async getObj(c, key) {
+
+		const client = await this.client(c);
+		const { bucket } = await settingService.query(c);
+
+		return await client.send(new GetObjectCommand({ Bucket: bucket, Key: key }));
+	},
+
 	async deleteObj(c, keys) {
 
 		if (typeof keys === 'string') {
@@ -73,23 +81,6 @@ const s3Service = {
 				}
 			})
 		);
-	},
-
-	async getObj(c, key) {
-		const client = await this.client(c);
-		const { bucket } = await settingService.query(c);
-		const result = await client.send(new GetObjectCommand({
-			Bucket: bucket,
-			Key: key
-		}));
-
-		return new Response(result.Body, {
-			headers: {
-				'Content-Type': result.ContentType || 'application/octet-stream',
-				'Content-Disposition': result.ContentDisposition || null,
-				'Cache-Control': result.CacheControl || null
-			}
-		});
 	},
 
 

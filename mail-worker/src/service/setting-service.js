@@ -8,8 +8,6 @@ import constant from '../const/constant';
 import BizError from '../error/biz-error';
 import {t} from '../i18n/i18n'
 import verifyRecordService from './verify-record-service';
-import userContext from '../security/user-context';
-import domainUtils from '../utils/domain-uitls';
 
 const settingService = {
 
@@ -49,7 +47,20 @@ const settingService = {
 		domainList = domainList.map(item => '@' + item);
 		setting.domainList = domainList;
 
+
+		let linuxdoSwitch = c.env.linuxdo_switch;
 		let projectLink = c.env.project_link;
+
+		if (typeof linuxdoSwitch === 'string' && linuxdoSwitch === 'true') {
+			linuxdoSwitch = true
+		} else if (linuxdoSwitch === true) {
+			linuxdoSwitch = true
+		} else {
+			linuxdoSwitch = false
+		}
+
+		console.log(projectLink)
+
 		if (typeof projectLink === 'string' && projectLink === 'false') {
 			projectLink = false
 		} else if (projectLink === false) {
@@ -59,6 +70,10 @@ const settingService = {
 		}
 
 		setting.projectLink = projectLink;
+
+		setting.linuxdoClientId = c.env.linuxdo_client_id;
+		setting.linuxdoCallbackUrl = c.env.linuxdo_callback_url;
+		setting.linuxdoSwitch = linuxdoSwitch;
 
 		setting.emailPrefixFilter = setting.emailPrefixFilter.split(",").filter(Boolean);
 
@@ -86,9 +101,7 @@ const settingService = {
 
 		settingRow.s3AccessKey = settingRow.s3AccessKey ? `${settingRow.s3AccessKey.slice(0, 12)}******` : null;
 		settingRow.s3SecretKey = settingRow.s3SecretKey ? `${settingRow.s3SecretKey.slice(0, 12)}******` : null;
-		settingRow.tgBotToken = settingRow.tgBotToken ? `${settingRow.tgBotToken.slice(0, 20)}******` : null;
 		settingRow.hasR2 = !!c.env.r2
-		settingRow.hasCfEmail = !!c.env.email
 
 		let regVerifyOpen = false
 		let addVerifyOpen = false
@@ -106,6 +119,7 @@ const settingService = {
 		settingRow.addVerifyOpen = addVerifyOpen
 
 		settingRow.storageType = await r2Service.storageType(c);
+		settingRow.aiEnabled = !!c.env.AI;
 
 		return settingRow;
 	},
@@ -121,16 +135,7 @@ const settingService = {
 			params.emailPrefixFilter = params.emailPrefixFilter + '';
 		}
 
-		if (Array.isArray(params.aiCodeFilter)) {
-			params.aiCodeFilter = params.aiCodeFilter + '';
-		}
-
-		if (params.webhookUrl !== undefined) {
-			params.webhookUrl = domainUtils.toOssDomain(params.webhookUrl) || '';
-		}
-
 		params.resendTokens = JSON.stringify(resendTokens);
-
 		await orm(c).update(setting).set({ ...params }).returning().get();
 		await this.refresh(c);
 	},
@@ -170,7 +175,7 @@ const settingService = {
 			await r2Service.putObj(c, background, arrayBuffer, {
 				contentType: file.type,
 				cacheControl: `public, max-age=31536000, immutable`,
-				contentDisposition: `inline; filename="${file.name}"`
+				contentDisposition: fileUtils.contentDisposition('inline', file.name)
 			});
 
 		}
@@ -180,18 +185,9 @@ const settingService = {
 		return background;
 	},
 
-
-	async setBlacklist(c, params) {
-		const { blackSubject, blackContent, blackFrom  } = params
-		await orm(c).update(setting).set({ blackSubject, blackContent, blackFrom }).run();
-		await this.refresh(c);
-		return this.get(c);
-	},
-
 	async websiteConfig(c) {
 
 		const settingRow = await this.get(c, true);
-		const token = await userContext.getToken(c);
 
 		return {
 			register: settingRow.register,
@@ -206,7 +202,7 @@ const settingService = {
 			siteKey: settingRow.siteKey,
 			background: settingRow.background,
 			loginOpacity: settingRow.loginOpacity,
-			domainList: settingRow.loginDomain === 1 && !token ? [] : settingRow.domainList,
+			domainList: settingRow.domainList,
 			regKey: settingRow.regKey,
 			regVerifyOpen: settingRow.regVerifyOpen,
 			addVerifyOpen: settingRow.addVerifyOpen,
@@ -220,16 +216,12 @@ const settingService = {
 			notice: settingRow.notice,
 			loginDomain: settingRow.loginDomain,
 			linuxdoClientId: settingRow.linuxdoClientId,
+			linuxdoCallbackUrl: settingRow.linuxdoCallbackUrl,
 			linuxdoSwitch: settingRow.linuxdoSwitch,
-			githubClientId: settingRow.githubClientId,
-			githubSwitch: settingRow.githubSwitch,
-			googleClientId: settingRow.googleClientId,
-			googleSwitch: settingRow.googleSwitch,
 			minEmailPrefix: settingRow.minEmailPrefix,
 			projectLink: settingRow.projectLink
 		};
-	},
-
+	}
 };
 
 export default settingService;

@@ -7,7 +7,6 @@ export const email = sqliteTable('email', {
 	accountId: integer('account_id').notNull(),
 	userId: integer('user_id').notNull(),
 	subject: text('subject'),
-	code: text('code').default('').notNull(),
 	text: text('text'),
 	content: text('content'),
 	cc: text('cc').default('[]'),
@@ -24,6 +23,8 @@ export const email = sqliteTable('email', {
 	message: text('message'),
 	unread: integer('unread').default(0).notNull(),
 	createTime: text('create_time').default(sql`CURRENT_TIMESTAMP`).notNull(),
+	aiMetadata: text('ai_metadata').default('').notNull(),
+	folder: integer('folder').default(0).notNull(),
 	isDel: integer('is_del').default(0).notNull()
 });
 export default email

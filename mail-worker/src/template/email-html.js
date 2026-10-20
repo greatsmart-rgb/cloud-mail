@@ -7,7 +7,6 @@ export default function emailHtmlTemplate(html, domain) {
 	document.querySelectorAll('script').forEach(script => script.remove());
 	html = document.toString();
 	html = html.replace(/{{domain}}/g, domainUtils.toOssDomain(domain) + '/');
-	const safeHtmlJson = JSON.stringify(html).replace(/</g, '\\u003C');
 
 	return `<!DOCTYPE html>
 <html lang='en' >
@@ -128,7 +127,7 @@ export default function emailHtmlTemplate(html, domain) {
         }
 
         // 使用示例
-        const exampleHtml = ${safeHtmlJson};
+        const exampleHtml = \`${html}\`;
 
         // 渲染HTML
         renderHTML(exampleHtml);

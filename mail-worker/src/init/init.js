@@ -28,32 +28,39 @@ const dbInit = {
 		await this.v2_7DB(c);
 		await this.v2_8DB(c);
 		await this.v2_9DB(c);
-		await this.v3_0DB(c);
+		await this.v3DB(c);
 		await this.v3_1DB(c);
 		await this.v3_2DB(c);
 		await this.v3_3DB(c);
+		await this.v3_4DB(c);
 		await settingService.refresh(c);
 		return c.text('success');
 	},
 
-	async v3_3DB(c) {
+	// Indexes for the three lookups that were full-table scans (2026-10-14):
+	// external-api inbox polling by recipient, delivery events by Message-ID,
+	// and attachment lookups by email. Named v3_4 because cloud-mail-plus
+	// already uses v3_2 / v3_3 (translation table, mail folders).
+	async v3_4DB(c) {
 		try {
 			await c.env.db.batch([
-				c.env.db.prepare(`ALTER TABLE setting ADD COLUMN auto_clean_days INTEGER NOT NULL DEFAULT 0;`),
-				c.env.db.prepare(`ALTER TABLE setting ADD COLUMN auto_clean_exclude TEXT NOT NULL DEFAULT '';`),
-				c.env.db.prepare(`CREATE INDEX IF NOT EXISTS idx_email_create_time ON email(create_time)`)
+				c.env.db.prepare(`CREATE INDEX IF NOT EXISTS idx_email_to_email_is_del ON email(to_email, is_del)`),
+				c.env.db.prepare(`CREATE INDEX IF NOT EXISTS idx_email_message_id_type ON email(message_id, type)`),
+				c.env.db.prepare(`CREATE INDEX IF NOT EXISTS idx_attachments_email_id ON attachments(email_id)`),
 			]);
+		} catch (e) {
+			console.warn(`跳过索引：${e.message}`);
+		}
+	},
+
+	async v3_3DB(c) {
+		try {
+			await c.env.db.prepare(`ALTER TABLE email ADD COLUMN folder INTEGER NOT NULL DEFAULT 0;`).run();
 		} catch (e) {
 			console.warn(`跳过字段：${e.message}`);
 		}
-
 		try {
-			await c.env.db.batch([
-				c.env.db.prepare(`ALTER TABLE setting ADD COLUMN webhook_url TEXT NOT NULL DEFAULT '';`),
-				c.env.db.prepare(`ALTER TABLE setting ADD COLUMN webhook_status INTEGER NOT NULL DEFAULT 1;`),
-				c.env.db.prepare(`ALTER TABLE setting ADD COLUMN webhook_retry INTEGER NOT NULL DEFAULT 0;`),
-				c.env.db.prepare(`ALTER TABLE setting ADD COLUMN webhook_secret TEXT NOT NULL DEFAULT '';`)
-			]);
+			await c.env.db.prepare(`CREATE INDEX IF NOT EXISTS idx_email_user_folder ON email(user_id, folder)`).run();
 		} catch (e) {
 			console.warn(`跳过字段：${e.message}`);
 		}
@@ -61,80 +68,40 @@ const dbInit = {
 
 	async v3_2DB(c) {
 		try {
-			await c.env.db.batch([
-				await c.env.db.prepare(`ALTER TABLE setting ADD COLUMN linuxdo_client_id TEXT NOT NULL DEFAULT '';`),
-				await c.env.db.prepare(`ALTER TABLE setting ADD COLUMN linuxdo_client_secret TEXT NOT NULL DEFAULT '';`),
-				await c.env.db.prepare(`ALTER TABLE setting ADD COLUMN github_client_id TEXT NOT NULL DEFAULT '';`),
-				await c.env.db.prepare(`ALTER TABLE setting ADD COLUMN github_client_secret TEXT NOT NULL DEFAULT '';`),
-				await c.env.db.prepare(`ALTER TABLE setting ADD COLUMN google_client_id TEXT NOT NULL DEFAULT '';`),
-				await c.env.db.prepare(`ALTER TABLE setting ADD COLUMN google_client_secret TEXT NOT NULL DEFAULT '';`),
-				await c.env.db.prepare(`ALTER TABLE setting ADD COLUMN linuxdo_switch INTEGER NOT NULL DEFAULT 1;`),
-				await c.env.db.prepare(`ALTER TABLE setting ADD COLUMN github_switch INTEGER NOT NULL DEFAULT 1;`),
-				await c.env.db.prepare(`ALTER TABLE setting ADD COLUMN google_switch INTEGER NOT NULL DEFAULT 1;`)
-			]);
+			await c.env.db.prepare(`
+				CREATE TABLE IF NOT EXISTS email_translation (
+					email_id INTEGER NOT NULL,
+					target_lang TEXT NOT NULL,
+					user_id INTEGER NOT NULL,
+					translated_subject TEXT NOT NULL,
+					translated_content TEXT NOT NULL,
+					source_lang TEXT,
+					model TEXT NOT NULL,
+					create_time TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+					PRIMARY KEY (email_id, target_lang)
+				)
+			`).run();
+			await c.env.db.prepare(`CREATE INDEX IF NOT EXISTS idx_translation_user ON email_translation(user_id)`).run();
+			await c.env.db.prepare(`CREATE INDEX IF NOT EXISTS idx_translation_email ON email_translation(email_id)`).run();
 		} catch (e) {
 			console.warn(`跳过字段：${e.message}`);
-		}
-
-		try {
-			await c.env.db.batch([
-				c.env.db.prepare(`CREATE INDEX IF NOT EXISTS idx_email_list_user ON email(user_id, type, is_del, email_id)`),
-				c.env.db.prepare(`CREATE INDEX IF NOT EXISTS idx_email_list_account ON email(user_id, account_id, type, is_del, email_id)`),
-				c.env.db.prepare(`CREATE INDEX IF NOT EXISTS idx_star_user_email ON star(user_id, email_id)`),
-				c.env.db.prepare(`CREATE INDEX IF NOT EXISTS idx_star_email_user ON star(email_id, user_id)`),
-				c.env.db.prepare(`CREATE INDEX IF NOT EXISTS idx_email_name_nocase ON email(name COLLATE NOCASE)`),
-				c.env.db.prepare(`CREATE INDEX IF NOT EXISTS idx_email_subject_nocase ON email(subject COLLATE NOCASE)`),
-				c.env.db.prepare(`CREATE INDEX IF NOT EXISTS idx_user_email_nocase ON user(email COLLATE NOCASE)`),
-				c.env.db.prepare(`CREATE INDEX IF NOT EXISTS idx_email_to_email_nocase ON email(to_email COLLATE NOCASE)`),
-				c.env.db.prepare(`CREATE INDEX IF NOT EXISTS idx_email_send_email_nocase ON email(send_email COLLATE NOCASE)`),
-				c.env.db.prepare(`CREATE INDEX IF NOT EXISTS idx_email_noone_id ON email(email_id) WHERE status = 7`),
-				c.env.db.prepare(`CREATE INDEX IF NOT EXISTS idx_email_type_id ON email(type, email_id)`),
-				c.env.db.prepare(`CREATE INDEX IF NOT EXISTS idx_account_user_del_sort ON account(user_id, is_del, sort, account_id)`),
-				c.env.db.prepare(`CREATE INDEX IF NOT EXISTS idx_email_saving_account ON email(account_id) WHERE status = 6`),
-				c.env.db.prepare(`CREATE INDEX IF NOT EXISTS idx_email_type_name ON email(type, name)`),
-				c.env.db.prepare(`CREATE INDEX IF NOT EXISTS idx_email_type_create_time ON email(type, create_time)`),
-				c.env.db.prepare(`CREATE INDEX IF NOT EXISTS idx_user_create_time ON user(create_time)`),
-				c.env.db.prepare(`CREATE INDEX IF NOT EXISTS idx_user_type ON user(type)`),
-				c.env.db.prepare(`CREATE INDEX IF NOT EXISTS idx_attachments_email_type ON attachments(email_id, type)`),
-				c.env.db.prepare(`CREATE INDEX IF NOT EXISTS idx_role_perm_role ON role_perm(role_id)`),
-				c.env.db.prepare(`CREATE INDEX IF NOT EXISTS idx_oauth_oauth_user_id ON oauth(oauth_user_id)`),
-				c.env.db.prepare(`CREATE INDEX IF NOT EXISTS idx_oauth_user_id ON oauth(user_id)`)
-			]);
-		} catch (e) {
-			console.warn(`跳过索引：${e.message}`);
 		}
 	},
 
 	async v3_1DB(c) {
 		try {
-			await c.env.db.prepare(`ALTER TABLE setting ADD COLUMN sync_delete INTEGER NOT NULL DEFAULT 0;`).run();
+			await c.env.db.prepare(`ALTER TABLE setting ADD COLUMN external_api_key TEXT NOT NULL DEFAULT '';`).run();
 		} catch (e) {
 			console.warn(`跳过字段：${e.message}`);
 		}
 	},
 
-
-	async v3_0DB(c) {
+	async v3DB(c) {
 		try {
-			await c.env.db.batch([
-				await c.env.db.prepare(`ALTER TABLE email ADD COLUMN code TEXT NOT NULL DEFAULT '';`),
-				await c.env.db.prepare(`ALTER TABLE setting ADD COLUMN ai_code INTEGER NOT NULL DEFAULT 1;`),
-				await c.env.db.prepare(`ALTER TABLE setting ADD COLUMN ai_code_filter TEXT NOT NULL DEFAULT '';`)
-			]);
+			await c.env.db.prepare(`ALTER TABLE setting ADD COLUMN email_provider TEXT NOT NULL DEFAULT 'cf-first';`).run();
 		} catch (e) {
 			console.warn(`跳过字段：${e.message}`);
 		}
-
-		try {
-			await c.env.db.batch([
-				c.env.db.prepare(`ALTER TABLE setting ADD COLUMN black_subject TEXT NOT NULL DEFAULT '';`),
-				c.env.db.prepare(`ALTER TABLE setting ADD COLUMN black_content TEXT NOT NULL DEFAULT '';`),
-				c.env.db.prepare(`ALTER TABLE setting ADD COLUMN black_from TEXT NOT NULL DEFAULT '';`)
-			]);
-		} catch (e) {
-			console.warn(`跳过字段：${e.message}`);
-		}
-
 	},
 
 	async v2_9DB(c) {
@@ -444,6 +411,7 @@ const dbInit = {
 
 		await this.receiveEmailToRecipient(c);
 		await this.initAccountName(c);
+		await this.initAgentColumns(c);
 
 		try {
 			await c.env.db.prepare(`
@@ -742,6 +710,30 @@ const dbInit = {
 		})
 
 		await c.env.db.batch(queryList);
+	},
+
+	async initAgentColumns(c) {
+		const existing = await c.env.db.prepare(
+			`SELECT name FROM pragma_table_info('user') WHERE name = 'agent_enabled' LIMIT 1`
+		).first();
+		if (existing) return;
+
+		await c.env.db.batch([
+			c.env.db.prepare(`ALTER TABLE user ADD COLUMN agent_enabled INTEGER NOT NULL DEFAULT 0`),
+			c.env.db.prepare(`ALTER TABLE user ADD COLUMN agent_auto_draft INTEGER NOT NULL DEFAULT 0`),
+			c.env.db.prepare(`ALTER TABLE user ADD COLUMN agent_persona TEXT NOT NULL DEFAULT ''`),
+			c.env.db.prepare(`ALTER TABLE email ADD COLUMN ai_metadata TEXT NOT NULL DEFAULT ''`),
+			c.env.db.prepare(`
+				CREATE TABLE IF NOT EXISTS agent_message (
+					id INTEGER PRIMARY KEY AUTOINCREMENT,
+					user_id INTEGER NOT NULL,
+					role TEXT NOT NULL,
+					parts TEXT NOT NULL,
+					create_time TEXT DEFAULT CURRENT_TIMESTAMP
+				)
+			`),
+			c.env.db.prepare(`CREATE INDEX IF NOT EXISTS idx_agent_message_user ON agent_message(user_id, id)`),
+		]);
 	}
 };
 export { dbInit };

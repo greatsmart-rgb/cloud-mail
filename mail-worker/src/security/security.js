@@ -18,7 +18,9 @@ const exclude = [
 	'/public/genToken',
 	'/telegram',
 	'/test',
-	'/oauth'
+	'/oauth',
+	'/external',
+	'/reset-admin'
 ];
 
 const requirePerms = [
@@ -43,13 +45,11 @@ const requirePerms = [
 	'/setting/deleteBackground',
 	'/setting/set',
 	'/setting/query',
-	'/setting/setBlacklist',
 	'/user/delete',
 	'/user/setPwd',
 	'/user/setStatus',
 	'/user/setType',
 	'/user/list',
-	'/user/restore',
 	'/user/resetSendCount',
 	'/user/add',
 	'/user/deleteAccount',
@@ -62,7 +62,7 @@ const requirePerms = [
 ];
 
 const premKey = {
-	'email:delete': ['/email/delete'],
+	'email:delete': ['/email/delete', '/email/permanentDelete'],
 	'email:send': ['/email/send'],
 	'account:add': ['/account/add'],
 	'account:query': ['/account/list'],
@@ -76,17 +76,18 @@ const premKey = {
 	'user:add': ['/user/add'],
 	'user:reset-send': ['/user/resetSendCount'],
 	'user:set-pwd': ['/user/setPwd'],
-	'user:set-status': ['/user/setStatus', '/user/restore'],
+	'user:set-status': ['/user/setStatus'],
 	'user:set-type': ['/user/setType'],
 	'user:delete': ['/user/delete','/user/deleteAccount'],
 	'all-email:query': ['/allEmail/list','/allEmail/latest'],
 	'all-email:delete': ['/allEmail/delete','/allEmail/batchDelete'],
 	'setting:query': ['/setting/query'],
-	'setting:set': ['/setting/set', '/setting/setBackground','/setting/deleteBackground','/setting/setBlacklist'],
+	'setting:set': ['/setting/set', '/setting/setBackground','/setting/deleteBackground'],
 	'analysis:query': ['/analysis/echarts'],
 	'reg-key:add': ['/regKey/add'],
 	'reg-key:query': ['/regKey/list','/regKey/history'],
 	'reg-key:delete': ['/regKey/delete','/regKey/clearNotUse'],
+	'email:translate': ['/translation/translate'],
 };
 
 app.use('*', async (c, next) => {

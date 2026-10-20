@@ -4,7 +4,6 @@ import emailService from './email-service';
 import BizError from '../error/biz-error';
 import { and, desc, eq, lt, sql, inArray } from 'drizzle-orm';
 import email from '../entity/email';
-import { emailListColumns, emailBriefColumns } from '../lib/email-list-columns';
 import { isDel } from '../const/entity-const';
 import attService from "./att-service";
 import { t } from '../i18n/i18n'
@@ -42,49 +41,42 @@ const starService = {
 	},
 
 	async list(c, params, userId) {
-		let { emailId, size, full } = params;
-		emailId = Number(emailId) || 0;
+		let { emailId, size } = params;
+		emailId = Number(emailId);
 		size = Number(size);
-		full = Number(full) === 1;
-		const columns = full ? emailListColumns : emailBriefColumns;
+
+		if (!emailId) {
+			emailId = 9999999999;
+		}
 
 		const list = await orm(c).select({
 			isStar: sql`1`.as('isStar'),
-			starId: star.starId,
-			...columns
+			starId: star.starId
+			, ...email
 		}).from(star)
 			.leftJoin(email, eq(email.emailId, star.emailId))
 			.where(
 				and(
 					eq(star.userId, userId),
 					eq(email.isDel, isDel.NORMAL),
-					emailId ? lt(star.emailId, emailId) : undefined))
+					lt(star.emailId, emailId)))
 			.orderBy(desc(star.emailId))
 			.limit(size)
 			.all();
 
-		if (full) {
-			const emailIds = list.map(item => item.emailId);
-			const attsList = await attService.selectByEmailIds(c, emailIds);
-			list.forEach(emailRow => {
-				emailRow.attList = attsList.filter(attsRow => attsRow.emailId === emailRow.emailId);
-			});
-		} else {
-			list.forEach(emailRow => {
-				emailRow.listText = emailService.toListText(emailRow);
-				delete emailRow.text;
-				delete emailRow.content;
-			});
-		}
+		const emailIds = list.map(item => item.emailId);
+
+		const attsList = await attService.selectByEmailIds(c, emailIds);
+
+		list.forEach(emailRow => {
+			const atts = attsList.filter(attsRow => attsRow.emailId === emailRow.emailId);
+			emailRow.attList = atts;
+		});
 
 		return { list };
 	},
 	async removeByEmailIds(c, emailIds) {
 		await orm(c).delete(star).where(inArray(star.emailId, emailIds)).run();
-	},
-
-	async removeByUserIds(c, userIds) {
-		await orm(c).delete(star).where(inArray(star.userId, userIds)).run();
 	}
 };
 

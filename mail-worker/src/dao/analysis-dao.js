@@ -1,3 +1,5 @@
+import { emailConst } from '../const/entity-const';
+
 const analysisDao = {
 	async numberCount(c) {
 		const { results } = await c.env.db.prepare(`
@@ -24,7 +26,7 @@ const analysisDao = {
                         SUM(CASE WHEN type = 0 AND is_del = 0 THEN 1 ELSE 0 END) AS normalReceiveTotal,
                         SUM(CASE WHEN type = 1 AND is_del = 0 THEN 1 ELSE 0 END) AS normalSendTotal
                     FROM
-                        email
+                        email where status != ${emailConst.status.SAVING}
                 ) e
             CROSS JOIN (
                 SELECT
@@ -47,18 +49,16 @@ const analysisDao = {
 	},
 
 	async userDayCount(c, diffHours) {
-		const { tzMod, tzBack } = this.tzModifiers(diffHours);
 		const { results } = await c.env.db.prepare(`
             SELECT
-                DATE(create_time, '${tzMod}') AS date,
+                DATE(create_time,'+${diffHours} hours') AS date,
                 COUNT(*) AS total
             FROM
                 user
             WHERE
-                create_time >= datetime('now', '${tzMod}', 'start of day', '-15 days', '${tzBack}')
-                AND create_time < datetime('now', '${tzMod}', 'start of day', '${tzBack}')
+                DATE(create_time,'+${diffHours} hours') BETWEEN DATE('now', '-15 days', '+${diffHours} hours') AND DATE('now','-1 day','+${diffHours} hours')
             GROUP BY
-                DATE(create_time, '${tzMod}')
+                DATE(create_time,'+${diffHours} hours')
             ORDER BY
                 date ASC
         `).all();
@@ -66,19 +66,17 @@ const analysisDao = {
 	},
 
 	async receiveDayCount(c, diffHours) {
-		const { tzMod, tzBack } = this.tzModifiers(diffHours);
 		const { results } = await c.env.db.prepare(`
             SELECT
-                DATE(create_time, '${tzMod}') AS date,
+                DATE(create_time,'+${diffHours} hours') AS date,
                 COUNT(*) AS total
             FROM
                 email
             WHERE
-                type = 0
-                AND create_time >= datetime('now', '${tzMod}', 'start of day', '-15 days', '${tzBack}')
-                AND create_time < datetime('now', '${tzMod}', 'start of day', '${tzBack}')
+			  				DATE(create_time,'+${diffHours} hours') BETWEEN DATE('now', '-15 days', '+${diffHours} hours') AND DATE('now','-1 day','+${diffHours} hours')
+                AND type = 0
             GROUP BY
-                DATE(create_time, '${tzMod}')
+                DATE(create_time,'+${diffHours} hours')
             ORDER BY
                 date ASC
         `).all();
@@ -86,29 +84,21 @@ const analysisDao = {
 	},
 
 	async sendDayCount(c, diffHours) {
-		const { tzMod, tzBack } = this.tzModifiers(diffHours);
 		const { results } = await c.env.db.prepare(`
             SELECT
-                DATE(create_time, '${tzMod}') AS date,
+                DATE(create_time,'+${diffHours} hours') AS date,
                 COUNT(*) AS total
             FROM
                 email
             WHERE
-                type = 1
-                AND create_time >= datetime('now', '${tzMod}', 'start of day', '-15 days', '${tzBack}')
-                AND create_time < datetime('now', '${tzMod}', 'start of day', '${tzBack}')
+			  				DATE(create_time,'+${diffHours} hours') BETWEEN DATE('now', '-15 days', '+${diffHours} hours') AND DATE('now','-1 day','+${diffHours} hours')
+                AND type = 1
             GROUP BY
-                DATE(create_time, '${tzMod}')
+                DATE(create_time,'+${diffHours} hours')
             ORDER BY
                 date ASC
         `).all();
 		return results;
-	},
-
-	tzModifiers(diffHours) {
-		const tzMod = diffHours >= 0 ? `+${diffHours} hours` : `${diffHours} hours`;
-		const tzBack = (-diffHours) >= 0 ? `+${-diffHours} hours` : `${-diffHours} hours`;
-		return { tzMod, tzBack };
 	}
 
 };

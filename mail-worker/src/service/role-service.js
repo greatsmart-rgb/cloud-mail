@@ -165,6 +165,7 @@ const roleService = {
 		const availIndex = availDomain.findIndex(item => {
 			const domain = emailUtils.getDomain(email.toLowerCase());
 			const availDomainItem = item.toLowerCase();
+			console.log(domain,availDomainItem)
 			return domain === availDomainItem
 		})
 
@@ -177,7 +178,7 @@ const roleService = {
 
 	selectByUserIds(c, userIds) {
 
-		if (!userIds || userIds.length === 0) {
+		if (!userIds && userIds.length === 0) {
 			return [];
 		}
 

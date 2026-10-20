@@ -21,9 +21,9 @@ const attService = {
 			}
 
 			if (!attachment.contentId) {
-				metadate.contentDisposition = `attachment;filename=${attachment.filename}`
+				metadate.contentDisposition = fileUtils.contentDisposition('attachment', attachment.filename)
 			} else {
-				metadate.contentDisposition = `inline;filename=${attachment.filename}`
+				metadate.contentDisposition = fileUtils.contentDisposition('inline', attachment.filename)
 				metadate.cacheControl = `max-age=259200`
 			}
 
@@ -84,22 +84,52 @@ const attService = {
 			//邮件正文站内图片转cid附件
 			if (src && (src.startsWith(domainUtils.toOssDomain(r2Domain)) || src.startsWith('attachments/'))) {
 
-				const cid = uuidv4().replace(/-/g, '')
-				img.setAttribute('src', 'cid:' + cid);
-
 				const attData = {};
 
 				if (src.startsWith(domainUtils.toOssDomain(r2Domain))) {
 					attData.key = src.replace(domainUtils.toOssDomain(r2Domain) + '/','');
+					attData.path = src;
 				}
 
 				if (src.startsWith('attachments/')) {
+					const origin = new URL(c.req.url).origin;
 					attData.key = src;
+					attData.path = origin + '/' + src;
 				}
 
-				attData.contentId = cid;
-				attData.type = attConst.type.EMBED;
-				imageDataList.push(attData);
+				// The outgoing MIME is assembled from `content`; a part without it is
+				// dropped, which used to leave the rewritten `cid:` reference pointing
+				// at nothing and the recipient seeing a broken image. So fetch the bytes
+				// FIRST and only rewrite the src once we know we can attach them —
+				// otherwise leave the original URL, which still renders wherever the
+				// bucket is publicly readable.
+				let objBuff = null;
+				let objType = '';
+				try {
+					const obj = await c.env.r2.get(attData.key);
+					if (obj) {
+						objBuff = await obj.arrayBuffer();
+						objType = obj.httpMetadata?.contentType || '';
+					} else {
+						console.warn(`[att] embedded image missing in R2, keeping URL: ${attData.key}`);
+					}
+				} catch (e) {
+					console.warn(`[att] embedded image read failed, keeping URL: ${attData.key}: ${e.message}`);
+				}
+
+				if (objBuff) {
+					const cid = uuidv4().replace(/-/g, '');
+					img.setAttribute('src', 'cid:' + cid);
+
+					attData.contentId = cid;
+					attData.type = attConst.type.EMBED;
+					attData.content = fileUtils.buffToBase64(objBuff);
+					attData.size = objBuff.byteLength;
+					attData.filename = attData.key.split('/').pop() || 'image';
+					attData.mimeType = objType || 'application/octet-stream';
+					attData.contentType = attData.mimeType;
+					imageDataList.push(attData);
+				}
 
 			}
 
@@ -114,34 +144,22 @@ const attService = {
 		}
 
 		//查询已有内嵌url图片信息
-		const keys = [...new Set(imageDataList.filter(item => !item.content).map(item => item.key))];
+		const keys = [...new Set(imageDataList.filter(item => item.path).map(item => item.key))];
 		const dbImageList  = await this.selectOneByKeys(c, keys);
 
 		//设置给当前附件
-		await Promise.all(imageDataList.map(async image => {
-			if (image.content) {
-				return;
-			}
+		imageDataList.forEach(image => {
+			dbImageList.forEach(dbImage => {
+				if (image.path && (image.key === dbImage.key)) {
+					image.size = dbImage.size;
+					image.filename = dbImage.filename;
+					image.mimeType = dbImage.mimeType;
+					image.contentType = dbImage.mimeType;
+				}
+			})
+		})
 
-			const dbImage = dbImageList.find(dbImage => image.key === dbImage.key);
-			if (!dbImage) {
-				return;
-			}
-
-			image.size = dbImage.size;
-			image.filename = dbImage.filename;
-			image.mimeType = dbImage.mimeType;
-			image.contentType = dbImage.mimeType;
-
-			const obj = await r2Service.getObj(c, image.key);
-			if (!obj) {
-				return;
-			}
-
-			image.content = obj instanceof ArrayBuffer ? obj : await obj.arrayBuffer();
-		}))
-
-		imageDataList = imageDataList.filter(image => image.content);
+		imageDataList = imageDataList.filter(image => !image.path || image.size);
 
 		return { imageDataList, html: document.toString() };
 	},
@@ -167,7 +185,7 @@ const attService = {
 		for (let att of attList) {
 			await r2Service.putObj(c, att.key, att.buff, {
 				contentType: att.type,
-				contentDisposition: `attachment;filename=${att.filename}`
+				contentDisposition: fileUtils.contentDisposition('attachment', att.filename)
 			});
 		}
 
@@ -180,13 +198,16 @@ const attService = {
 			attData.emailId = emailId;
 			attData.accountId = accountId;
 			attData.type = attConst.type.EMBED;
+			// `content` (base64) exists only to build the outgoing MIME. There is no
+			// such column on `attachments` — it must not reach the insert.
+			delete attData.content;
 			if (!attData.buff) {
 				continue;
 			}
 			await r2Service.putObj(c, attData.key, attData.buff, {
 				contentType: attData.mimeType,
 				cacheControl: `max-age=259200`,
-				contentDisposition: `inline;filename=${attData.filename}`
+				contentDisposition: fileUtils.contentDisposition('inline', attData.filename)
 			});
 			delete attData.buff;
 		}
@@ -241,11 +262,7 @@ const attService = {
 		const delKeyList = attListResult.flatMap(r => r.results ? r.results.map(row => row.key) : []);
 
 		if (delKeyList.length > 0) {
-			try {
-				await this.batchDelete(c, delKeyList);
-			} catch (e) {
-				console.error('删除附件文件失败：', e);
-			}
+			await this.batchDelete(c, delKeyList);
 		}
 
 	},
@@ -271,6 +288,28 @@ const attService = {
 			return []
 		}
 		return orm(c).select().from(att).where(inArray(att.key, keys)).orderBy(desc(att.attId)).groupBy(att.key).all();
+	},
+
+	// --- AI agent helpers ---
+	async getOne(c, emailId, attIndex, userId) {
+		const rows = await orm(c).select().from(att)
+			.where(and(eq(att.emailId, emailId), eq(att.userId, userId)))
+			.orderBy(att.attId)
+			.all();
+		return rows[attIndex] || null;
+	},
+
+	async fetchBytes(c, attRow) {
+		if (!attRow?.key) return new Uint8Array();
+		if (c.env.r2) {
+			const obj = await c.env.r2.get(attRow.key);
+			if (obj) return new Uint8Array(await obj.arrayBuffer());
+		}
+		if (c.env.kv) {
+			const buf = await c.env.kv.get(attRow.key, 'arrayBuffer');
+			if (buf) return new Uint8Array(buf);
+		}
+		return new Uint8Array();
 	}
 };
 

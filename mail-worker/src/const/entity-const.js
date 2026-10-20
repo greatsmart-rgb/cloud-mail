@@ -54,6 +54,11 @@ export const emailConst = {
 	unread: {
 		UNREAD: 0,
 		READ: 1
+	},
+	folder: {
+		INBOX: 0,
+		JUNK: 1,
+		ARCHIVE: 2
 	}
 }
 
@@ -112,10 +117,6 @@ export const settingConst = {
 		OPEN: 0,
 		CLOSE: 1,
 	},
-	webhookStatus: {
-		OPEN: 0,
-		CLOSE: 1,
-	},
 	ruleType: {
 		ALL: 0,
 		RULE: 1
@@ -132,17 +133,14 @@ export const settingConst = {
 		OPEN: 0,
 		CLOSE: 1
 	},
-	aiCode: {
-		OPEN: 0,
-		CLOSE: 1
-	},
-	syncDelete: {
-		OPEN: 0,
-		CLOSE: 1
-	},
 	authRefresh: {
 		OPEN: 1,
 		CLOSE: 0
+	},
+	emailProvider: {
+		CF_FIRST: 'cf-first',
+		RESEND_ONLY: 'resend-only',
+		CF_ONLY: 'cf-only'
 	}
 }
 
