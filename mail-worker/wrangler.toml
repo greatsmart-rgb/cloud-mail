@@ -1,47 +1,104 @@
+# ⚠️  这是模板配置：下面的绑定需要你自己填写自己的资源 ID。
+#
+# 不要在已经部署了 cloud-mail-hybrid 的 Cloudflare 账号下执行 `wrangler deploy`。
+# 三个仓库的 Worker 名同为 `cloud-mail`，一次部署会用这份「零绑定」的配置覆盖掉
+# 生产 Worker —— 自定义域名路由、D1、KV、R2、send_email 绑定全部消失，邮件服务
+# 立即中断。部署前先确认 `name` 与目标账号里现有的 Worker 不冲突。
+#
+# ⚠️  Template config: fill in your own resource IDs below.
+#
+# Do NOT run `wrangler deploy` from here in a Cloudflare account that already
+# runs cloud-mail-hybrid. All three repos declare the same Worker name
+# (`cloud-mail`), so deploying this binding-less config REPLACES the production
+# Worker — custom domain route, D1, KV, R2 and send_email bindings all go away
+# and mail stops flowing. Confirm `name` does not collide before deploying.
+
 name = "cloud-mail"
 main = "src/index.js"
 compatibility_date = "2025-06-04"
+compatibility_flags = ["nodejs_compat"]
 keep_vars = true
 
 [observability]
 enabled = true
 
 #[[d1_databases]]
-#binding = "db"			#d1数据库绑定名默认不可修改
-#database_name = "cloudmail"		#d1数据库名字
-#database_id = "e6af7041-962a-451f-bd52-241e896cfc60"		#d1数据库id
+#binding = "db"			# D1 database binding (do not change)
+#database_name = ""		# Your D1 database name
+#database_id = ""		# Your D1 database ID
 
 #[[kv_namespaces]]
-#binding = "kv"			#kv绑定名默认不可修改
-#id = "f15aada5480f457bbc1e849b0cea4ebe"					#kv数据库id
+#binding = "kv"			# KV binding (do not change)
+#id = ""				# Your KV namespace ID
 
 #[[r2_buckets]]
-#binding = "r2"			#r2对象存储绑定名默认不可修改
-#bucket_name = "89279c65393c96cc0a21bb4e31e0122f"		#r2对象存储桶的名字
-
-#[[send_email]]
-#name = "email"			#CF发件, 配置后优先使用
-
-[ai]
-binding = "ai"
+#binding = "r2"			# R2 binding (do not change)
+#bucket_name = ""		# Your R2 bucket name
 
 [assets]
-binding = "assets"		#静态资源绑定名默认不可修改
-directory = "./dist"	#前端vue项目打包的静态资源存放位置,默认dist
+binding = "assets"
+directory = "./dist"
 not_found_handling = "single-page-application"
 run_worker_first = true
 
 [triggers]
-crons = ["0 * * * *"]	#每小时执行；resetDaySendCount 仅在 UTC 0 点生效
+crons = ["0 16 * * *"]	# Daily housekeeping at 16:00 UTC
 
+# Uncomment to enable Cloudflare Email Service for outbound sending
+#[[send_email]]
+#name = "EMAIL"
 
-[vars]
-#ai_model = ""			#ai模型,不填默认使用@cf/meta/llama-3.1-8b-instruct-fast
-#analysis_cache = false			#是否开启分析数据缓存
-#orm_log = false			#是否sql日志
-#domain = []				#邮件域名可可配置多个 示例: ["example1.com","example2.com"]
-#admin = ""					#管理员的邮箱	示例: admin@example.com
-#jwt_secret = ""			#jwt令牌的密钥,随便填一串字符串
+# --- AI Email Agent (optional, requires Workers AI access) ---
+# Uncomment to enable the AIChatAgent side panel + auto-draft on inbound email.
+# Model: @cf/moonshotai/kimi-k2.5
+#[ai]
+#binding = "AI"
+
+#[[durable_objects.bindings]]
+#name = "EMAIL_AGENT"
+#class_name = "EmailAgent"
+
+#[[migrations]]
+#tag = "v1-add-email-agent"
+#new_sqlite_classes = ["EmailAgent"]
+
+#[vars]
+#orm_log = false
+#domain = '["example.com"]'	# Your email domains (array)
+#admin = "admin@example.com"	# Admin email address
+#jwt_secret = ""				# Random string for JWT signing
 
 [build]
 command = "pnpm --prefix ../mail-vue install && pnpm --prefix ../mail-vue run build"
+
+# --- Cloudflare Email Service delivery events (optional) ---
+# Uncomment to have the `queue()` handler in src/index.js consume outbound
+# delivery events (delivered/deferred/bounced/failed/rejected/complained) and
+# write real delivery status onto the email row — which is what makes
+# `GET /external/status/:emailId` report bounces instead of a send-time guess.
+#
+# Requires, in your own Cloudflare account:
+#   1. A queue:  npx wrangler queues create email-events
+#   2. One event subscription PER sending domain (wrangler cannot create these
+#      yet — its --source list predates `email.sending`, so use the REST API):
+#
+#      POST /accounts/{account_id}/event_subscriptions/subscriptions
+#      { "name": "<domain>-email-events", "enabled": true,
+#        "events": ["message.delivered","message.deferred","message.bounced",
+#                   "message.failed","message.rejected","message.complained"],
+#        "source":      {"type":"email.sending","zone_id":"<zone>","domain":"<domain>"},
+#        "destination": {"type":"queues.queue","queue_id":"<queue_id>"} }
+#
+#      `source.domain` is mandatory. Domains without a subscription still send
+#      fine — their rows just stay at `sent`.
+#
+# Strongly recommended: configure a dead_letter_queue. Without one, a consumer
+# failure past max_retries silently discards the bounce event.
+#
+#[[queues.consumers]]
+#queue = "email-events"
+#max_batch_size = 25
+#max_batch_timeout = 5
+#max_retries = 3
+#dead_letter_queue = "email-events-dlq"
+
