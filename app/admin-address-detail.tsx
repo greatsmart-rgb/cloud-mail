@@ -1,0 +1,1294 @@
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Switch,
+  Text,
+  TextInput,
+  View,
+  type GestureResponderEvent,
+} from "react-native";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
+import { Stack, useLocalSearchParams, useRouter } from "expo-router";
+
+import { ScreenContainer } from "@/components/screen-container";
+import { SwipeableScreen, SwipeSuspendView } from "@/components/swipeable-screen";
+import {
+  FloatingActionMenu,
+  type FloatingActionMenuAnchor,
+  type FloatingActionMenuItem,
+} from "@/components/floating-action-menu";
+import { MiniToast } from "@/components/mini-toast";
+import { IconSymbol } from "@/components/ui/icon-symbol";
+import { useColors } from "@/hooks/use-colors";
+import { useMail } from "@/lib/mail-context";
+import {
+  adminClearInbox,
+  adminClearSentItems,
+  adminDeleteMail,
+  adminDeleteSentMail,
+  adminSendMail,
+  fetchAdminMails,
+  fetchAdminMailsSince,
+  fetchAdminSendbox,
+  fetchAdminSendboxSince,
+  type ParsedMail,
+  type RawMail,
+} from "@/lib/api";
+import { copyTextToClipboard } from "@/lib/clipboard";
+import { readMailboxCache, writeMailboxCache } from "@/lib/mail-cache";
+import { mergeMailLists, sortMailsDesc } from "@/lib/mail-list-utils";
+import { getSyncAnchor, setSyncAnchor, buildAnchorFromMails, clearSyncAnchor } from "@/lib/mail-sync-anchor";
+import { setAdminMailEntry } from "@/lib/admin-mail-store";
+import {
+  buildAdminMailReadKey,
+  loadAdminMailUnreadKeySet,
+  markAdminMailRead,
+  reconcileAdminMailReadState,
+  subscribeAdminMailReadState,
+} from "@/lib/admin-mail-read-state";
+import {
+  blockAdminMailSender,
+  getAdminMailSpamSender,
+  isAdminMailSpamBySenderSet,
+  loadAdminMailSpamSenderSet,
+  subscribeAdminMailSpamState,
+} from "@/lib/admin-mail-spam-state";
+import {
+  formatMailDate,
+  formatMailboxDisplay,
+  getMailPreview,
+  getMailRecipientsDisplay,
+  getSenderDisplay,
+  getVerificationCode,
+  parseMail,
+} from "@/lib/mail-parser";
+
+type AddressDetailTab = "inbox" | "sent" | "send";
+
+const PAGE_SIZE = 30;
+const ADDRESS_SEGMENT_PADDING = 4;
+const ADDRESS_SEGMENT_ANIMATION_MS = 96;
+const ADDRESS_DETAIL_TABS: { key: AddressDetailTab; label: string }[] = [
+  { key: "inbox", label: "收件箱" },
+  { key: "sent", label: "发件箱" },
+  { key: "send", label: "发邮件" },
+];
+
+export default function AdminAddressDetailScreen() {
+  const colors = useColors();
+  const router = useRouter();
+  const params = useLocalSearchParams<{ addressId?: string; addressName?: string }>();
+  const addressName = typeof params.addressName === "string" ? params.addressName : "";
+  const addressId = typeof params.addressId === "string" ? params.addressId : "";
+  const [tab, setTab] = useState<AddressDetailTab>("inbox");
+  const [miniToastMessage, setMiniToastMessage] = useState<string | null>(null);
+  const [segmentTrackWidth, setSegmentTrackWidth] = useState(0);
+  const segmentProgress = useSharedValue(0);
+  const activeTabIndex = useMemo(
+    () => ADDRESS_DETAIL_TABS.findIndex((item) => item.key === tab),
+    [tab]
+  );
+  const segmentItemWidth =
+    segmentTrackWidth > 0
+      ? (segmentTrackWidth - ADDRESS_SEGMENT_PADDING * 2) / ADDRESS_DETAIL_TABS.length
+      : 0;
+  const segmentIndicatorStyle = useAnimatedStyle(() => ({
+    width: segmentItemWidth,
+    transform: [
+      {
+        translateX:
+          ADDRESS_SEGMENT_PADDING + segmentProgress.value * segmentItemWidth,
+      },
+    ],
+  }));
+
+  useEffect(() => {
+    segmentProgress.value = withTiming(activeTabIndex, {
+      duration: ADDRESS_SEGMENT_ANIMATION_MS,
+    });
+  }, [activeTabIndex, segmentProgress]);
+
+  const selectAdjacentTab = useCallback(
+    (direction: -1 | 1) => {
+      const nextTab = ADDRESS_DETAIL_TABS[activeTabIndex + direction]?.key;
+      if (nextTab) {
+        setTab(nextTab);
+      }
+    },
+    [activeTabIndex]
+  );
+
+  if (!addressName) {
+    return (
+      <ScreenContainer edges={["top", "bottom", "left", "right"]}>
+        <View style={styles.emptyWrap}>
+          <Text style={[styles.emptyText, { color: colors.muted }]}>地址未找到</Text>
+          <Pressable
+            onPress={() => router.back()}
+            style={({ pressed }) => [
+              styles.primaryButton,
+              { backgroundColor: colors.primary, opacity: pressed ? 0.8 : 1 },
+            ]}
+          >
+            <Text style={styles.primaryButtonText}>返回</Text>
+          </Pressable>
+        </View>
+      </ScreenContainer>
+    );
+  }
+
+  return (
+    <ScreenContainer edges={["top", "bottom", "left", "right"]}>
+      <Stack.Screen
+        options={{
+          fullScreenGestureEnabled: activeTabIndex === 0,
+          gestureEnabled: activeTabIndex === 0,
+        }}
+      />
+      <View style={[styles.header, { borderBottomColor: colors.border }]}>
+        <Pressable
+          onPress={() => router.back()}
+          style={({ pressed }) => [styles.iconButton, { opacity: pressed ? 0.6 : 1 }]}
+        >
+          <IconSymbol name="arrow.left" size={22} color={colors.primary} />
+        </Pressable>
+        <View style={styles.headerTextWrap}>
+          <Text style={[styles.headerTitle, { color: colors.foreground }]}>单地址管理</Text>
+          <Text
+            numberOfLines={1}
+            style={[styles.headerSubtitle, { color: colors.muted }]}
+          >
+            {addressName}
+          </Text>
+        </View>
+        <Pressable
+          onPress={async () => {
+            const ok = await copyTextToClipboard(addressName);
+            if (ok) {
+              setMiniToastMessage("地址已复制");
+            } else {
+              Alert.alert("复制失败", addressName);
+            }
+          }}
+          style={({ pressed }) => [styles.iconButton, { opacity: pressed ? 0.6 : 1 }]}
+        >
+          <IconSymbol name="doc.on.doc" size={18} color={colors.primary} />
+        </Pressable>
+      </View>
+
+      <View style={styles.summaryWrap}>
+        <View
+          style={[
+            styles.summaryCard,
+            { backgroundColor: colors.surface, borderColor: colors.border },
+          ]}
+        >
+          <Text style={[styles.summaryLabel, { color: colors.muted }]}>地址 ID</Text>
+          <Text style={[styles.summaryValue, { color: colors.foreground }]}>
+            #{addressId || "—"}
+          </Text>
+        </View>
+        <View
+          style={[
+            styles.summaryCard,
+            { backgroundColor: colors.surface, borderColor: colors.border },
+          ]}
+        >
+          <Text style={[styles.summaryLabel, { color: colors.muted }]}>当前地址</Text>
+          <Text
+            style={[styles.summaryValue, { color: colors.foreground }]}
+            numberOfLines={1}
+          >
+            {addressName}
+          </Text>
+        </View>
+      </View>
+
+      <View style={styles.segmentWrap}>
+        <View
+          onLayout={(event) => setSegmentTrackWidth(event.nativeEvent.layout.width)}
+          style={[
+            styles.segmentTrack,
+            { backgroundColor: colors.surface, borderColor: colors.border },
+          ]}
+        >
+          {segmentItemWidth > 0 ? (
+            <Animated.View
+              pointerEvents="none"
+              style={[
+                styles.segmentIndicator,
+                { backgroundColor: colors.primary },
+                segmentIndicatorStyle,
+              ]}
+            />
+          ) : null}
+          {ADDRESS_DETAIL_TABS.map(({ key, label }) => (
+            <Pressable
+              key={key}
+              onPress={() => setTab(key)}
+              style={styles.segmentItem}
+            >
+              <Text
+                style={[
+                  styles.segmentText,
+                  { color: tab === key ? "#FFFFFF" : colors.foreground },
+                ]}
+              >
+                {label}
+              </Text>
+            </Pressable>
+          ))}
+        </View>
+      </View>
+
+      <SwipeableScreen
+        onSwipeLeft={
+          activeTabIndex < ADDRESS_DETAIL_TABS.length - 1
+            ? () => selectAdjacentTab(1)
+            : undefined
+        }
+        onSwipeRight={
+          activeTabIndex > 0 ? () => selectAdjacentTab(-1) : undefined
+        }
+      >
+        <View style={{ flex: 1 }}>
+          {tab === "inbox" ? (
+            <AddressMailList
+              address={addressName}
+              colors={colors}
+              kind="inbox"
+              onMiniToast={(message) => setMiniToastMessage(message)}
+              onClear={async () => {
+                await adminClearInbox(addressName);
+              }}
+            />
+          ) : tab === "sent" ? (
+            <AddressMailList
+              address={addressName}
+              colors={colors}
+              kind="sent"
+              onMiniToast={(message) => setMiniToastMessage(message)}
+              onClear={async () => {
+                await adminClearSentItems(addressName);
+              }}
+            />
+          ) : (
+            <AddressSendPanel address={addressName} colors={colors} />
+          )}
+        </View>
+      </SwipeableScreen>
+      <MiniToast
+        message={miniToastMessage}
+        onDismiss={() => setMiniToastMessage(null)}
+      />
+    </ScreenContainer>
+  );
+}
+
+function AddressMailList({
+  address,
+  colors,
+  kind,
+  onMiniToast,
+  onClear,
+}: {
+  address: string;
+  colors: ReturnType<typeof useColors>;
+  kind: "inbox" | "sent";
+  onMiniToast: (message: string) => void;
+  onClear: () => Promise<void>;
+}) {
+  const router = useRouter();
+  const { state: mailState } = useMail();
+  const [data, setData] = useState<ParsedMail[]>([]);
+  const [count, setCount] = useState(0);
+  const [offset, setOffset] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
+  const [unreadMailKeys, setUnreadMailKeys] = useState<Set<string>>(new Set());
+  const [blockedSenders, setBlockedSenders] = useState<Set<string>>(new Set());
+  const [mailActionMenu, setMailActionMenu] = useState<{
+    anchor: FloatingActionMenuAnchor;
+    items: FloatingActionMenuItem[];
+  } | null>(null);
+  const dataRef = useRef<ParsedMail[]>([]);
+  const offsetRef = useRef(0);
+  const listRootRef = useRef<React.ElementRef<typeof View>>(null);
+  const readStateScope = mailState.workerUrl;
+  const readStateViewKey = useMemo(
+    () => `admin-address:${address.trim().toLowerCase()}:inbox`,
+    [address]
+  );
+
+  const cacheKeyInput = useMemo(
+    () => ({ workerUrl: mailState.workerUrl, address, box: kind === "inbox" ? "inbox" as const : "sent" as const }),
+    [mailState.workerUrl, address, kind]
+  );
+
+  const syncAnchorInput = useMemo(
+    () => ({ workerUrl: mailState.workerUrl, address, box: kind === "inbox" ? "inbox" as const : "sent" as const }),
+    [mailState.workerUrl, address, kind]
+  );
+
+  useEffect(() => {
+    dataRef.current = data;
+  }, [data]);
+
+  useEffect(() => {
+    offsetRef.current = offset;
+  }, [offset]);
+
+  useEffect(() => {
+    if (kind !== "inbox" || !readStateScope.trim()) {
+      setUnreadMailKeys(new Set());
+      return;
+    }
+
+    let isMounted = true;
+    const refresh = async () => {
+      const nextUnreadKeys = await loadAdminMailUnreadKeySet(readStateScope);
+      if (isMounted) {
+        setUnreadMailKeys(nextUnreadKeys);
+      }
+    };
+
+    void refresh();
+    const unsubscribe = subscribeAdminMailReadState((event) => {
+      if (event.workerUrl !== readStateScope) return;
+      setUnreadMailKeys(new Set(event.unreadKeys));
+    });
+
+    return () => {
+      isMounted = false;
+      unsubscribe();
+    };
+  }, [kind, readStateScope]);
+
+  useEffect(() => {
+    if (kind !== "inbox" || !readStateScope.trim()) {
+      setBlockedSenders(new Set());
+      return;
+    }
+
+    let isMounted = true;
+    const refresh = async () => {
+      const nextBlockedSenders = await loadAdminMailSpamSenderSet(readStateScope);
+      if (isMounted) {
+        setBlockedSenders(nextBlockedSenders);
+      }
+    };
+
+    void refresh();
+    const unsubscribe = subscribeAdminMailSpamState((event) => {
+      if (event.workerUrl !== readStateScope) return;
+      setBlockedSenders(new Set(event.blockedSenders));
+    });
+
+    return () => {
+      isMounted = false;
+      unsubscribe();
+    };
+  }, [kind, readStateScope]);
+
+  const parseRawMails = useCallback(
+    async (results: RawMail[]): Promise<ParsedMail[]> => {
+      return Promise.all(
+        results.map(async (item) => {
+          try {
+            const parsedMail = await parseMail(item);
+            return {
+              ...parsedMail,
+              ownerAddress: item.address || address,
+              mailboxKind: kind === "inbox" ? "inbox" as const : "sendbox" as const,
+            } as ParsedMail;
+          } catch {
+            return {
+              id: item.id,
+              subject: item.subject || "(解析失败)",
+              raw: item.raw || item.source || "",
+              createdAt: item.created_at,
+              ownerAddress: item.address || address,
+              mailboxKind: kind === "inbox" ? "inbox" as const : "sendbox" as const,
+            } as ParsedMail;
+          }
+        })
+      );
+    },
+    [address, kind]
+  );
+
+  const load = useCallback(
+    async (freshOffset: number = 0) => {
+      setIsLoading(true);
+      try {
+        // --- Cache-first: show cached mails immediately on first load ---
+        if (freshOffset === 0 && dataRef.current.length === 0) {
+          const cached = await readMailboxCache(cacheKeyInput);
+          if (cached.length > 0) {
+            setData(sortMailsDesc(cached));
+          }
+        }
+
+        // --- Incremental or full fetch ---
+        const anchor = freshOffset === 0
+          ? await getSyncAnchor(syncAnchorInput)
+          : null;
+
+        let parsed: ParsedMail[];
+        let serverCount: number;
+
+        if (anchor && freshOffset === 0) {
+          // Incremental: only fetch mails newer than anchor
+          const result = kind === "inbox"
+            ? await fetchAdminMailsSince({ address, sinceId: anchor.latestMailId })
+            : await fetchAdminSendboxSince({ address, sinceId: anchor.latestMailId });
+
+          parsed = await parseRawMails(result.newMails);
+          serverCount = -1;
+
+          if (result.newMails.length > 0) {
+            await setSyncAnchor(syncAnchorInput, {
+              latestMailId: result.latestMailId,
+              latestCreatedAt: result.latestCreatedAt,
+              totalFetched: anchor.totalFetched + result.newMails.length,
+            });
+          }
+        } else if (freshOffset === 0) {
+          // Cold start: full first page
+          const page = kind === "inbox"
+            ? await fetchAdminMails({ address, limit: PAGE_SIZE, offset: 0 })
+            : await fetchAdminSendbox({ address, limit: PAGE_SIZE, offset: 0 });
+
+          parsed = await parseRawMails(page.results);
+          serverCount = page.count;
+
+          const newAnchor = buildAnchorFromMails(page.results);
+          if (newAnchor) {
+            await setSyncAnchor(syncAnchorInput, newAnchor);
+          }
+        } else {
+          // Pagination: load more
+          const page = kind === "inbox"
+            ? await fetchAdminMails({ address, limit: PAGE_SIZE, offset: freshOffset })
+            : await fetchAdminSendbox({ address, limit: PAGE_SIZE, offset: freshOffset });
+
+          parsed = await parseRawMails(page.results);
+          serverCount = page.count;
+        }
+
+        const nextData =
+          freshOffset === 0 && dataRef.current.length > 0
+            ? mergeMailLists(dataRef.current, parsed)
+            : freshOffset === 0
+              ? sortMailsDesc(parsed)
+              : mergeMailLists(dataRef.current, parsed);
+
+        if (kind === "inbox" && readStateScope.trim()) {
+          const nextUnreadKeys = await reconcileAdminMailReadState({
+            workerUrl: readStateScope,
+            viewKey: readStateViewKey,
+            mails: nextData,
+            allowMarkUnread: freshOffset === 0,
+          });
+          setUnreadMailKeys(nextUnreadKeys);
+        }
+
+        setData(nextData);
+        if (serverCount >= 0) {
+          setCount(serverCount);
+        }
+        setOffset(
+          freshOffset === 0
+            ? Math.max(offsetRef.current, parsed.length)
+            : freshOffset + parsed.length
+        );
+
+        // Persist cache
+        await writeMailboxCache(cacheKeyInput, nextData);
+      } catch (err: any) {
+        Alert.alert("加载失败", err.message || "");
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [address, kind, readStateScope, readStateViewKey, cacheKeyInput, syncAnchorInput, parseRawMails]
+  );
+
+  useEffect(() => {
+    setData([]);
+    setCount(0);
+    setOffset(0);
+    load(0);
+  }, [address, kind, load]);
+
+  const markMailReadLocally = useCallback(
+    (mail: ParsedMail) => {
+      if (kind !== "inbox" || !readStateScope.trim()) return;
+      const readKey = buildAdminMailReadKey(mail);
+      setUnreadMailKeys((prev) => {
+        if (!prev.has(readKey)) return prev;
+        const next = new Set(prev);
+        next.delete(readKey);
+        return next;
+      });
+      void markAdminMailRead(readStateScope, mail);
+    },
+    [kind, readStateScope]
+  );
+
+  const handleOpenMail = useCallback(
+    (mail: ParsedMail) => {
+      const entryKind = kind === "inbox" ? "inbox" : "sendbox";
+      markMailReadLocally(mail);
+      const cacheKey = `${entryKind}-${mail.id}-${address}`;
+      setAdminMailEntry(cacheKey, { mail, kind: entryKind });
+      router.push({
+        pathname: "/admin-mail-detail",
+        params: { cacheKey },
+      });
+    },
+    [address, kind, markMailReadLocally, router]
+  );
+
+  const handleDelete = useCallback(
+    (mail: ParsedMail) => {
+      Alert.alert("删除邮件", mail.subject || "(无主题)", [
+        { text: "取消", style: "cancel" },
+        {
+          text: "删除",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              if (kind === "inbox") {
+                await adminDeleteMail(mail.id);
+              } else {
+                await adminDeleteSentMail(mail.id);
+              }
+              markMailReadLocally(mail);
+              setData((prev) => prev.filter((item) => item.id !== mail.id));
+              setCount((prev) => Math.max(0, prev - 1));
+            } catch (err: any) {
+              Alert.alert("删除失败", err.message || "");
+            }
+          },
+        },
+      ]);
+    },
+    [kind, markMailReadLocally]
+  );
+
+  const handleClear = useCallback(() => {
+    Alert.alert(
+      kind === "inbox" ? "清空收件箱" : "清空发件箱",
+      `确定清空 ${address} 的${kind === "inbox" ? "收件箱" : "发件箱"}吗？`,
+      [
+        { text: "取消", style: "cancel" },
+        {
+          text: "确定",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await onClear();
+              await clearSyncAnchor(syncAnchorInput);
+              setData([]);
+              setCount(0);
+              setOffset(0);
+              Alert.alert("已清空");
+            } catch (err: any) {
+              Alert.alert("操作失败", err.message || "");
+            }
+          },
+        },
+      ]
+    );
+  }, [address, kind, onClear, syncAnchorInput]);
+
+  const handleCopyCode = useCallback(
+    async (mail: ParsedMail, code: string) => {
+      const ok = await copyTextToClipboard(code);
+      if (ok) {
+        markMailReadLocally(mail);
+        onMiniToast("验证码已复制");
+      } else {
+        Alert.alert("复制失败", code);
+      }
+    },
+    [markMailReadLocally, onMiniToast]
+  );
+
+  const handleBlockSender = useCallback(
+    (mail: ParsedMail) => {
+      const sender = getAdminMailSpamSender(mail);
+      if (kind !== "inbox" || !sender || !readStateScope.trim()) {
+        Alert.alert("无法拒收", "这封邮件没有可识别的发件邮箱地址。");
+        return;
+      }
+
+      Alert.alert("拒收发件人", `以后来自 ${sender} 的邮件会进入垃圾信箱。`, [
+        { text: "取消", style: "cancel" },
+        {
+          text: "拒收",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await blockAdminMailSender(readStateScope, mail);
+              markMailReadLocally(mail);
+              onMiniToast("已加入垃圾信箱");
+            } catch (err: any) {
+              Alert.alert("操作失败", err?.message || "拒收失败");
+            }
+          },
+        },
+      ]);
+    },
+    [kind, markMailReadLocally, onMiniToast, readStateScope]
+  );
+
+  const closeMailActionMenu = useCallback(() => {
+    setMailActionMenu(null);
+  }, []);
+
+  const openMailActionMenu = useCallback(
+    (event: GestureResponderEvent, items: FloatingActionMenuItem[]) => {
+      const pageX = event.nativeEvent.pageX;
+      const pageY = event.nativeEvent.pageY;
+      const rootNode = listRootRef.current;
+
+      if (!rootNode) {
+        setMailActionMenu({ anchor: { x: pageX, y: pageY }, items });
+        return;
+      }
+
+      rootNode.measureInWindow((rootX, rootY) => {
+        setMailActionMenu({
+          anchor: { x: pageX - rootX, y: pageY - rootY },
+          items,
+        });
+      });
+    },
+    []
+  );
+
+  const handleMailLongPress = useCallback(
+    (mail: ParsedMail, event: GestureResponderEvent) => {
+      if (kind !== "inbox") {
+        openMailActionMenu(event, [
+          {
+            key: "delete",
+            label: "删除邮件",
+            subtitle: "从发件箱移除",
+            icon: "trash.fill",
+            destructive: true,
+            onPress: () => handleDelete(mail),
+          },
+        ]);
+        return;
+      }
+
+      const sender = getAdminMailSpamSender(mail);
+      const items: FloatingActionMenuItem[] = [];
+
+      if (sender) {
+        items.push({
+          key: "block",
+          label: "拒收该发件人",
+          subtitle: sender,
+          icon: "xmark.circle.fill",
+          destructive: true,
+          onPress: () => handleBlockSender(mail),
+        });
+      }
+
+      items.push({
+        key: "delete",
+        label: "删除邮件",
+        subtitle: "从这个地址中移除",
+        icon: "trash.fill",
+        destructive: true,
+        onPress: () => handleDelete(mail),
+      });
+
+      openMailActionMenu(event, items);
+    },
+    [handleBlockSender, handleDelete, kind, openMailActionMenu]
+  );
+
+  const visibleData = useMemo(
+    () =>
+      kind === "inbox"
+        ? data.filter((item) => !isAdminMailSpamBySenderSet(item, blockedSenders))
+        : data,
+    [blockedSenders, data, kind]
+  );
+
+  return (
+    <View ref={listRootRef} collapsable={false} style={{ flex: 1 }}>
+      <FlatList
+      data={visibleData}
+      keyExtractor={(item) => `${kind}-${item.id}`}
+      contentContainerStyle={visibleData.length === 0 ? styles.listEmptyContent : undefined}
+      refreshControl={
+        <RefreshControl
+            refreshing={isLoading && visibleData.length > 0}
+          onRefresh={() => load(0)}
+          tintColor={colors.primary}
+          colors={[colors.primary]}
+          progressBackgroundColor={colors.surface}
+        />
+      }
+      ListHeaderComponent={
+        <View style={styles.listHeader}>
+          <Text style={[styles.listHeaderText, { color: colors.muted }]}>
+            共 {count} 封
+          </Text>
+          <Pressable
+            onPress={handleClear}
+            style={({ pressed }) => [
+              styles.secondaryButton,
+              {
+                backgroundColor: colors.surface,
+                borderColor: colors.border,
+                opacity: pressed ? 0.75 : 1,
+              },
+            ]}
+          >
+            <Text style={[styles.secondaryButtonText, { color: colors.foreground }]}>
+              {kind === "inbox" ? "清空收件箱" : "清空发件箱"}
+            </Text>
+          </Pressable>
+        </View>
+      }
+      ListEmptyComponent={
+        !isLoading ? (
+          <View style={styles.emptyWrap}>
+            <Text style={[styles.emptyText, { color: colors.muted }]}>
+              {kind === "inbox" ? "这个地址还没有收件" : "这个地址还没有发件"}
+            </Text>
+          </View>
+        ) : null
+      }
+      ListFooterComponent={
+        isLoading ? (
+          <ActivityIndicator style={{ marginVertical: 20 }} color={colors.primary} />
+        ) : null
+      }
+      onEndReached={() => {
+        if (!isLoading && offset < count) {
+          load(offset);
+        }
+      }}
+      onEndReachedThreshold={0.5}
+      renderItem={({ item }) => {
+        const preview = getMailPreview(item, 100) || "(无内容)";
+        const code = getVerificationCode(item);
+        const isUnread =
+          kind === "inbox" && unreadMailKeys.has(buildAdminMailReadKey(item));
+        const primaryLine =
+          kind === "inbox"
+            ? getSenderDisplay(item)
+            : formatMailboxDisplay(item.to?.[0]) ||
+              getMailRecipientsDisplay(item) ||
+              "收件人";
+
+        return (
+          <Pressable
+            onPress={() => handleOpenMail(item)}
+            onLongPress={(event) => handleMailLongPress(item, event)}
+            delayLongPress={350}
+            style={({ pressed }) => [
+              styles.mailCard,
+              {
+                backgroundColor: colors.surface,
+                borderColor: colors.border,
+                opacity: pressed ? 0.78 : 1,
+              },
+            ]}
+          >
+            <View style={styles.mailCardHeader}>
+              <View style={styles.mailCardTitleWrap}>
+                <View style={styles.mailCardSubjectRow}>
+                  {isUnread ? (
+                    <View
+                      style={[
+                        styles.adminUnreadDot,
+                        { backgroundColor: colors.primary },
+                      ]}
+                    />
+                  ) : null}
+                  <Text
+                    numberOfLines={1}
+                    style={[styles.mailCardSubject, { color: colors.foreground }]}
+                  >
+                    {item.subject || "(无主题)"}
+                  </Text>
+                </View>
+                <Text
+                  numberOfLines={1}
+                  style={[styles.mailCardPrimary, { color: colors.muted }]}
+                >
+                  {primaryLine}
+                </Text>
+              </View>
+              <Text style={[styles.mailCardDate, { color: colors.muted }]}>
+                {formatMailDate(item.createdAt || item.date)}
+              </Text>
+            </View>
+
+            {code ? (
+                <Pressable
+                  onPress={(event) => {
+                    event.stopPropagation();
+                    void handleCopyCode(item, code);
+                  }}
+                style={({ pressed }) => [
+                  styles.codeChip,
+                  {
+                    backgroundColor: `${colors.primary}12`,
+                    borderColor: `${colors.primary}28`,
+                    opacity: pressed ? 0.72 : 1,
+                  },
+                ]}
+              >
+                <Text style={[styles.codeChipText, { color: colors.primary }]}>
+                  验证码 {code}
+                </Text>
+              </Pressable>
+            ) : null}
+
+            <Text style={[styles.mailCardPreview, { color: colors.muted }]} numberOfLines={2}>
+              {preview}
+            </Text>
+          </Pressable>
+        );
+      }}
+      />
+      <FloatingActionMenu
+        visible={!!mailActionMenu}
+        anchor={mailActionMenu?.anchor ?? null}
+        colors={colors}
+        items={mailActionMenu?.items ?? []}
+        onClose={closeMailActionMenu}
+      />
+    </View>
+  );
+}
+
+function AddressSendPanel({
+  address,
+  colors,
+}: {
+  address: string;
+  colors: ReturnType<typeof useColors>;
+}) {
+  const scrollRef = useRef<ScrollView>(null);
+  const defaultLabel = useMemo(() => address.trim(), [address]);
+  const [fromMail, setFromMail] = useState(address);
+  const [fromName, setFromName] = useState(defaultLabel);
+  const [toMail, setToMail] = useState("");
+  const [toName, setToName] = useState("");
+  const [subject, setSubject] = useState("");
+  const [content, setContent] = useState("");
+  const [isHtml, setIsHtml] = useState(true);
+  const [isSending, setIsSending] = useState(false);
+
+  useEffect(() => {
+    setFromMail(address);
+    setFromName(defaultLabel);
+    setToMail("");
+    setToName("");
+  }, [address, defaultLabel]);
+
+  const handleSend = useCallback(async () => {
+    if (!fromMail.trim() || !toMail.trim() || !subject.trim() || !content.trim()) {
+      Alert.alert("请补全内容", "发件地址、收件地址、主题和正文都不能为空。");
+      return;
+    }
+
+    setIsSending(true);
+    try {
+      await adminSendMail({
+        from_mail: fromMail.trim(),
+        from_name: fromName.trim(),
+        to_mail: toMail.trim(),
+        to_name: toName.trim(),
+        subject: subject.trim(),
+        is_html: isHtml,
+        content,
+      });
+      Alert.alert("发送成功");
+      setSubject("");
+      setContent("");
+    } catch (err: any) {
+      Alert.alert("发送失败", err.message || "");
+    } finally {
+      setIsSending(false);
+    }
+  }, [content, fromMail, fromName, isHtml, subject, toMail, toName]);
+
+  const scrollToBodyInput = useCallback(() => {
+    setTimeout(() => {
+      scrollRef.current?.scrollToEnd({ animated: true });
+    }, 120);
+  }, []);
+
+  return (
+    <KeyboardAvoidingView
+      style={styles.flex}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 88 : 0}
+    >
+      <ScrollView
+        ref={scrollRef}
+        style={styles.flex}
+        contentContainerStyle={styles.sendPanelContent}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="interactive"
+      >
+        <View
+          style={[
+            styles.formCard,
+            { backgroundColor: colors.surface, borderColor: colors.border },
+          ]}
+        >
+          <Text style={[styles.formTitle, { color: colors.foreground }]}>地址发信</Text>
+          <Text style={[styles.formHint, { color: colors.muted }]}>
+            已按当前地址预设发件身份，收件人保持空白，方便直接填写目标。
+          </Text>
+
+          <Field label="发件地址" value={fromMail} onChangeText={setFromMail} colors={colors} />
+          <Field label="发件名称" value={fromName} onChangeText={setFromName} colors={colors} />
+          <Field label="收件地址" value={toMail} onChangeText={setToMail} colors={colors} />
+          <Field label="收件名称" value={toName} onChangeText={setToName} colors={colors} />
+          <Field label="主题" value={subject} onChangeText={setSubject} colors={colors} />
+
+          <View style={styles.switchRow}>
+            <Text style={[styles.switchLabel, { color: colors.foreground }]}>HTML 正文</Text>
+            <Switch
+              value={isHtml}
+              onValueChange={setIsHtml}
+              trackColor={{ false: colors.border, true: `${colors.primary}66` }}
+              thumbColor={isHtml ? colors.primary : "#FFFFFF"}
+            />
+          </View>
+
+          <Text style={[styles.fieldLabel, { color: colors.muted }]}>正文</Text>
+          <SwipeSuspendView>
+            <TextInput
+              style={[
+                styles.textarea,
+                {
+                  color: colors.foreground,
+                  backgroundColor: colors.background,
+                  borderColor: colors.border,
+                },
+              ]}
+              value={content}
+              onChangeText={setContent}
+              onFocus={scrollToBodyInput}
+              placeholder={isHtml ? "<p>输入 HTML 正文</p>" : "输入纯文本正文"}
+              placeholderTextColor={colors.muted}
+              multiline
+              textAlignVertical="top"
+            />
+          </SwipeSuspendView>
+
+          <Pressable
+            onPress={handleSend}
+            disabled={isSending}
+            style={({ pressed }) => [
+              styles.primaryButton,
+              {
+                backgroundColor: colors.primary,
+                opacity: pressed || isSending ? 0.8 : 1,
+              },
+            ]}
+          >
+            {isSending ? (
+              <ActivityIndicator color="#FFFFFF" />
+            ) : (
+              <Text style={styles.primaryButtonText}>立即发送</Text>
+            )}
+          </Pressable>
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
+  );
+}
+
+function Field({
+  colors,
+  label,
+  onChangeText,
+  value,
+}: {
+  colors: ReturnType<typeof useColors>;
+  label: string;
+  onChangeText: (value: string) => void;
+  value: string;
+}) {
+  return (
+    <SwipeSuspendView style={styles.fieldWrap}>
+      <Text style={[styles.fieldLabel, { color: colors.muted }]}>{label}</Text>
+      <TextInput
+        style={[
+          styles.fieldInput,
+          {
+            color: colors.foreground,
+            backgroundColor: colors.background,
+            borderColor: colors.border,
+          },
+        ]}
+        value={value}
+        onChangeText={onChangeText}
+        placeholder={label}
+        placeholderTextColor={colors.muted}
+        autoCapitalize="none"
+      />
+    </SwipeSuspendView>
+  );
+}
+
+const styles = StyleSheet.create({
+  flex: {
+    flex: 1,
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderBottomWidth: 0.5,
+  },
+  headerTextWrap: {
+    flex: 1,
+    marginHorizontal: 10,
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+  },
+  headerSubtitle: {
+    fontSize: 12,
+    marginTop: 2,
+  },
+  iconButton: {
+    padding: 8,
+  },
+  summaryWrap: {
+    flexDirection: "row",
+    gap: 10,
+    paddingHorizontal: 16,
+    paddingTop: 14,
+  },
+  summaryCard: {
+    flex: 1,
+    borderWidth: 1,
+    borderRadius: 14,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+  },
+  summaryLabel: {
+    fontSize: 12,
+  },
+  summaryValue: {
+    fontSize: 14,
+    fontWeight: "700",
+    marginTop: 6,
+  },
+  segmentWrap: {
+    paddingHorizontal: 16,
+    paddingTop: 12,
+    paddingBottom: 10,
+  },
+  segmentTrack: {
+    flexDirection: "row",
+    borderRadius: 14,
+    borderWidth: 1,
+    padding: ADDRESS_SEGMENT_PADDING,
+    position: "relative",
+    overflow: "hidden",
+  },
+  segmentIndicator: {
+    position: "absolute",
+    top: ADDRESS_SEGMENT_PADDING,
+    bottom: ADDRESS_SEGMENT_PADDING,
+    borderRadius: 10,
+  },
+  segmentItem: {
+    flex: 1,
+    minHeight: 42,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 1,
+  },
+  segmentText: {
+    fontSize: 13,
+    fontWeight: "700",
+  },
+  listHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingBottom: 8,
+  },
+  listHeaderText: {
+    fontSize: 12,
+  },
+  secondaryButton: {
+    borderWidth: 1,
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  secondaryButtonText: {
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  mailCard: {
+    marginHorizontal: 16,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderRadius: 16,
+    padding: 14,
+  },
+  mailCardHeader: {
+    flexDirection: "row",
+    gap: 10,
+  },
+  mailCardTitleWrap: {
+    flex: 1,
+  },
+  mailCardSubjectRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    minWidth: 0,
+  },
+  adminUnreadDot: {
+    width: 7,
+    height: 7,
+    borderRadius: 3.5,
+    flexShrink: 0,
+  },
+  mailCardSubject: {
+    flexShrink: 1,
+    fontSize: 15,
+    fontWeight: "700",
+  },
+  mailCardPrimary: {
+    fontSize: 12,
+    marginTop: 4,
+  },
+  mailCardDate: {
+    fontSize: 11,
+  },
+  codeChip: {
+    alignSelf: "flex-start",
+    marginTop: 10,
+    borderWidth: 1,
+    borderRadius: 999,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+  },
+  codeChipText: {
+    fontSize: 12,
+    fontWeight: "700",
+  },
+  mailCardPreview: {
+    fontSize: 13,
+    lineHeight: 19,
+    marginTop: 10,
+  },
+  listEmptyContent: {
+    flexGrow: 1,
+    justifyContent: "center",
+  },
+  emptyWrap: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 24,
+  },
+  emptyText: {
+    fontSize: 15,
+    marginBottom: 14,
+    textAlign: "center",
+  },
+  primaryButton: {
+    minHeight: 46,
+    borderRadius: 14,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 18,
+  },
+  primaryButtonText: {
+    color: "#FFFFFF",
+    fontSize: 14,
+    fontWeight: "700",
+  },
+  sendPanelContent: {
+    paddingHorizontal: 16,
+    paddingBottom: 148,
+  },
+  formCard: {
+    borderWidth: 1,
+    borderRadius: 16,
+    padding: 16,
+  },
+  formTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+  },
+  formHint: {
+    fontSize: 12,
+    lineHeight: 18,
+    marginTop: 6,
+    marginBottom: 14,
+  },
+  fieldWrap: {
+    marginBottom: 12,
+  },
+  fieldLabel: {
+    fontSize: 12,
+    marginBottom: 6,
+  },
+  fieldInput: {
+    minHeight: 44,
+    borderWidth: 1,
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    fontSize: 14,
+  },
+  textarea: {
+    minHeight: 180,
+    borderWidth: 1,
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    fontSize: 14,
+    marginBottom: 16,
+  },
+  switchRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 12,
+  },
+  switchLabel: {
+    fontSize: 14,
+    fontWeight: "600",
+  },
+});
