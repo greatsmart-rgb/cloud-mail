@@ -24,8 +24,8 @@ enabled = true
 
 #[[d1_databases]]
 #binding = "db"			# D1 database binding (do not change)
-#database_name = ""		# Your D1 database name
-#database_id = ""		# Your D1 database ID
+#database_name = "cloudmail"		# Your D1 database name
+#database_id = "e6af7041-962a-451f-bd52-241e896cfc60"		# Your D1 database ID
 
 #[[kv_namespaces]]
 #binding = "kv"			# KV binding (do not change)
