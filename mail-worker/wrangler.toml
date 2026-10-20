@@ -33,7 +33,7 @@ enabled = true
 
 #[[r2_buckets]]
 #binding = "r2"			# R2 binding (do not change)
-#bucket_name = ""		# Your R2 bucket name
+#bucket_name = "cloud-mail-r2"		# Your R2 bucket name
 
 [assets]
 binding = "assets"
