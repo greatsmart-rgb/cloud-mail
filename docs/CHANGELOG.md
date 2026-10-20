@@ -1,0 +1,166 @@
+# 更新日志 / Changelog
+
+本文件记录 CloudMail 的主要公开版本变化。
+
+## V1.1.4 - 2026-10-01
+
+V1.1.4 修复 [#17](https://github.com/Lur1N77777/CloudMail/issues/17) 中中文邮件在 HTML 和纯文本模式下显示乱码的问题。
+
+### 中文
+
+- 为原生端补齐 GB2312、GBK、GB18030、Big5 等字符集解码，正确解析正文、主题、发件人名称和附件名称，并保留附件内容。
+- 旧邮箱缓存从保留的邮件原文重新解析，保留邮件标识、归属信息和增量同步进度；没有原文的旧管理员摘要失效后从第一页重新获取。
+- 增加 Expo 原生解码环境、多字符集、附件、缓存修复及迁移写入失败的回归测试。
+- 版本升级到 `1.1.4`，Android `versionCode` 与 iOS `buildNumber` 升级到 `18`。
+
+### English
+
+- Fixed Chinese email decoding in HTML and plain-text views by adding native support for GB2312, GBK, GB18030, Big5, and other charsets across bodies, subjects, sender names, and attachment names, while preserving attachment bytes.
+- Reparsed legacy mailbox caches from retained source messages without losing IDs, ownership metadata, or incremental sync progress. Invalidated legacy admin summaries without source data so they refresh from page zero.
+- Added regression tests for Expo's native decoder environment, multiple charsets, attachments, cache repair, and failed migration writes.
+- Bumped the app to `1.1.4` with Android/iOS build number `18`.
+
+## V1.1.3 - 2026-07-16
+
+V1.1.3 是生产发布加固版本，保持现有业务流程兼容，重点处理本地凭据安全、部署改动后的连接诊断、Android 权限和可复现发布。
+
+### 中文
+
+- Android/iOS 上的 Worker 管理员密码、站点密码、邮箱 JWT 和邮箱密码迁移到 SecureStore；安全写入成功后才清理 AsyncStorage 明文。
+- 多 Worker 与多邮箱凭据读取并行化；删除 Worker 或邮箱后清理不再使用的安全密钥，并保护共享身份的凭据不被误删。
+- 测试连接可区分站点密码错误、管理员密码错误、后端接口不兼容、超时、限流和 Worker 服务异常。
+- 移除未使用的通知、音频、视频和图片模块，显式阻止通知、录音、开机启动、唤醒锁、存储和悬浮窗权限。
+- Android 关闭应用数据备份；设置页新增隐私政策和使用条款入口。
+- CI 增加 Lint、生产 Web 导出、干净 Android Release 编译、最终 Manifest 和 SecureStore 依赖核验。
+- 版本升级到 `1.1.3`，Android `versionCode` 与 iOS `buildNumber` 升级到 `17`。
+- 修复 Web 主题 Hook 条件调用，并清理影响发布门禁的 Lint 警告。
+
+### English
+
+- Migrated Worker admin/site passwords and mailbox JWTs/passwords to SecureStore on Android/iOS, removing plaintext only after secure writes succeed.
+- Parallelized secure reads, cleaned up orphaned keys, and preserved credentials shared by duplicate mailbox identities.
+- Added precise diagnostics for site/admin password failures, incompatible APIs, timeouts, rate limits, and Worker errors.
+- Removed unused notification, audio, video, and image modules and blocked unrelated Android permissions.
+- Disabled Android app-data backup and added privacy/terms links in Settings.
+- Expanded CI with lint, production Web export, clean Android Release compilation, final manifest checks, and SecureStore dependency verification.
+- Bumped the app to `1.1.3` with Android/iOS build number `17`.
+- Fixed conditional Web theme-hook usage and removed release-gate lint warnings.
+
+### 签名迁移 / Signing migration
+
+V1.1.2 及更早 GitHub APK 使用调试证书。V1.1.3 起使用 EAS 生产证书，Android 不允许两种证书互相覆盖安装。旧版用户必须先记录 Worker 配置并复制需要保留的邮箱凭证，再卸载旧版并安装 V1.1.3。
+
+## V1.1.2 - 2026-05-07
+
+V1.1.2 是一次稳定性和性能体验版本，重点解决首次保存进入后台卡住、地址页无持久缓存、刷新指示重复和远端删除同步不及时等问题。
+
+### 中文
+
+- 保存 Workers 配置后立即进入管理员后台，管理员校验、统计和预热请求改为后台按需执行。
+- 新增地址页持久化缓存和地址索引缓存，地址、分组、搜索和用户筛选可缓存优先显示。
+- 优化地址和邮件刷新同步，服务端已删除的数据会在刷新时校正，避免旧缓存长期残留。
+- 修复地址删除 / 批量删除后分页 offset 未回退导致列表空白且无法继续加载的问题。
+- 优化收件、发件、未知和单地址邮件列表的缓存、分页和增量刷新链路。
+- 新增 Worker 前端地址配置，用于在地址列表和地址详情中一键复制登录链接。
+- 移除顶部重复“更新中”提示，只保留一个刷新指示；下拉刷新圆形背景适配浅色、普通深色和 OLED 黑主题。
+- 统一 Worker 时间解析和上海时间显示，修复列表时间与详情时间不一致的问题。
+
+### English
+
+- Saving Workers configuration now opens the admin console immediately; admin checks, statistics, and warm-up requests run on demand in the background.
+- Added persisted cache for the address list and full address index, making addresses, groups, search, and user filters cache-first.
+- Improved address and mail refresh synchronization so server-side deletions are corrected during mobile refresh.
+- Fixed pagination offset after address delete/batch delete to avoid empty lists that cannot load more data.
+- Improved cache, paging, and incremental refresh for inbox, sent, unknown, and single-address mail lists.
+- Added Worker frontend URL configuration for one-tap login-link copying from address lists and address details.
+- Removed duplicate top updating indicators and kept a single refresh spinner; RefreshControl backgrounds now match light, dark, and OLED black themes.
+- Unified Worker timestamp parsing and Shanghai-time display to keep list and detail timestamps consistent.
+
+## V1.1.1 - 2026-04-30
+
+V1.1.1 是多 Cloudflare 账号 / 多 Worker 支持版本，主要解决多个 Cloudflare 账号分别部署独立 Worker 时，App 只能使用单 Worker 的问题。
+
+### 新增
+
+- 新增多 Worker 配置档案 `WorkerProfile`，支持保存多个 Worker 的名称、地址、管理员密码、站点密码、域名列表和连接状态。
+- 设置页 `Workers 配置` 升级为 Worker 列表，可添加、编辑、删除、设为当前、测试连接和刷新域名。
+- 管理员后台顶部新增当前 Worker 快速切换入口，地址、收件、发件、未知、发送和统计默认按当前 Worker 工作。
+- 创建邮箱时根据所选域名自动路由到对应 Worker，域名选择器会显示来源 Worker。
+- 未知邮件一键创建地址支持按目标域名解析 Worker，不再默认只走当前 Worker。
+- 新增同域名冲突识别：多个 Worker 配置相同域名时不静默选错，要求用户明确选择或切换 Worker。
+
+### 优化
+
+- 旧单 Worker 配置会自动迁移为“默认账号”，升级后无需重新填写配置。
+- 新创建和导入的邮箱账号会记录 `workerProfileId / workerUrl`，便于后续请求始终走对应 Worker。
+- 邮件缓存、地址分组、未读状态和垃圾规则继续按 Worker 隔离，避免跨 Worker 串号。
+- 设置页测试连接增加草稿指纹校验，异步返回不会覆盖用户后续编辑内容。
+- 账号级 API 请求支持运行时 Worker 配置覆盖，切换当前 Worker 后也不会影响已有邮箱账号请求。
+
+### 修复
+
+- 修复同一个邮箱地址存在于不同 Worker 时，本地账号可能互相覆盖的问题。
+- 修复同地址跨 Worker 切换后，收件和用户设置可能没有重新加载的问题。
+- 修复邮箱密码导入时始终走当前 Worker，导致域名属于其他 Worker 时登录失败或绑定错误的问题。
+- 修复管理员缓存可能在切换 Worker 后复用旧 Worker 数据的风险。
+
+## V1.1.0 - 2026-04-29
+
+V1.1.0 是从 GitHub 上一个正式版本 **V1.0.12** 之后的管理员增强版本，重点是大量地址、用户筛选、批量操作和垃圾信箱。
+
+### 新增
+
+- 新增地址页 **全部用户 / 指定用户** 筛选入口，适配网页版实际接口 `/admin/users/bind_address/:user_id`，可查看某个用户绑定的邮箱地址。
+- 新增大量地址场景下的后台地址索引，分组和搜索不再只依赖当前分页数据，适合 800+ 地址的管理场景。
+- 新增地址选择模式，可长按地址进入批量管理。
+- 新增批量操作：全选当前范围、删除地址、清空收件、清空发件、清空全部邮件、删除空邮箱、批量加入/移出本地分组。
+- 新增收件页内置 **垃圾信箱**，通过标题下拉在 `收件箱 / 垃圾信箱` 间切换，不占用额外顶部导航栏空间。
+- 新增本地拒收规则，按完整发件邮箱地址将命中邮件归入垃圾信箱。
+- 新增长按邮件浮层菜单，可拒收发件人、取消拒收或删除邮件。
+- 新增 **一键全部已读**，可清除当前 Worker 下本地未读点，并同步到已挂载页面。
+- 新增共享浮层菜单组件，用于更精致的长按菜单和轻量弹出菜单。
+
+### 优化
+
+- 优化邮箱分组、收件箱切换、长按操作等浮层视觉，减少原生弹窗的突兀感。
+- 优化地址页用户筛选逻辑：不再误用 `/admin/address?user_id=`，避免错误提示“当前后端暂不能按照用户筛选地址”。
+- 优化用户切换时的请求竞态处理，避免旧请求覆盖新用户视图。
+- 优化地址缓存失效逻辑，删除、创建、绑定、未知邮件创建地址、批量操作后不再回放旧列表。
+- 优化刷新/同步/加载状态归属，避免失效请求导致加载状态卡住。
+- 优化垃圾信箱和普通收件、未知邮件之间的本地状态同步。
+
+### 修复
+
+- 修复地址数量很多时，分组内地址显示不全的问题。
+- 修复选择某个用户后一直显示“正在识别用户信息”或无法显示绑定地址的问题。
+- 修复 `/admin/address` 不返回 `user_id` 时 App 误判后端不支持用户筛选的问题。
+- 修复快速切换用户、刷新、搜索时可能出现旧数据闪现的问题。
+
+## V1.0.12 - 2026-04-25
+
+- 新增管理员侧新邮件未读点，增量刷新出现的新收件和未知邮件会显示本地未读标识。
+- 新增收件与未知邮件之间的本地已读状态同步。
+- 新增验证码复制成功提示 `验证码已复制`，复制成功后同步标记邮件已读。
+- 优化邮箱分组弹层，改为稳定的居中轻弹层并修复键盘输入时的闪烁问题。
+- 优化单邮箱详情发件表单的键盘避让体验。
+- 优化管理员页面滑动手感，一次手势最多切换一个页面。
+- 压缩地址、收件、发件和未知页面顶部工具区，给列表预览留出更多空间。
+
+## V1.0.11 - 2026-04-25
+
+- 应用流程改为管理员优先启动，管理员设置页移动到根级路由。
+- 新增 OLED 黑主题，并让管理员快捷主题按钮记住用户偏好的深色变体。
+- 新增管理员页面全屏 Reanimated 分页切换。
+- 优化管理员导航响应速度、列表渲染、页面预热和后台刷新体验。
+- 更新 README，说明新的管理员优先使用流程。
+
+## V1.0.10 - 2026-04-25
+
+- 准备 CloudMail 公开 GitHub 发布。
+- APK 改为通过 GitHub Releases 分发，不提交到源码仓库。
+- 补充开源项目元信息、贡献说明和安全说明。
+- 增加对上游项目 `dreamhunter2333/cloudflare_temp_email` 的致谢说明。
+
+## 更早版本
+
+更早版本主要是本地开发构建。可通过 Git 历史查看具体实现细节。
