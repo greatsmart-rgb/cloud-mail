@@ -64,9 +64,9 @@ crons = ["0 16 * * *"]	# Daily housekeeping at 16:00 UTC
 
 #[vars]
 #orm_log = false
-#domain = '["example.com"]'	# Your email domains (array)
-#admin = "admin@example.com"	# Admin email address
-#jwt_secret = ""				# Random string for JWT signing
+#domain = '["greatsmart.com.hk"]'	# Your email domains (array)
+#admin = "admin@greatsmart.com.hk"	# Admin email address
+#jwt_secret = "testtesttest"				# Random string for JWT signing
 
 [build]
 
