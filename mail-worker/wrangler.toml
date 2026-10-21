@@ -70,7 +70,7 @@ crons = ["0 16 * * *"]	# Daily housekeeping at 16:00 UTC
 
 [build]
 
-command = "pnpm --prefix ../pnpm install && pnpm --prefix ../pnpm run build"
+command = "pnpm --prefix ../mail-vue install && pnpm --prefix ../mail-vue run build"
 
 # --- Cloudflare Email Service delivery events (optional) ---
 # Uncomment to have the `queue()` handler in src/index.js consume outbound
