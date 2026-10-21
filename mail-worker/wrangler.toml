@@ -69,6 +69,9 @@ crons = ["0 16 * * *"]	# Daily housekeeping at 16:00 UTC
 #jwt_secret = ""				# Random string for JWT signing
 
 [build]
+
+npm run build && npx wrangler deploy
+
 command = "pnpm --prefix ../mail-vue install && pnpm --prefix ../mail-vue run build"
 
 # --- Cloudflare Email Service delivery events (optional) ---
