@@ -33,7 +33,7 @@
         "addon9": "workspace:*",
         "addon13": "workspace:*",
         "module6": "workspace:*",
-        "@babel/core": "~7.24.7",
+        "@babel/core": "~7.29.6",
         "@babel/plugin-transform-class-static-block": "~7.24.7",
         "@ember/optional-features": "~2.1.0",
         "@ember/string": "~3.1.1",
@@ -44,7 +44,7 @@
         "@embroider/compat": "~3.6.0",
         "@embroider/test-setup": "~4.0.0",
         "@embroider/webpack": "~4.0.4",
-        "@faker-js/faker": "~8.0.2",
+        "@faker-js/faker": "~10.6.0",
         "@glimmer/component": "~1.1.2",
         "@glimmer/tracking": "~1.1.2",
         "@glint/core": "1.4.0",
@@ -115,7 +115,7 @@
         "stylelint-prettier": "~3.0.0",
         "stylelint-scss": "~6.1.0",
         "typescript": "5.3.3",
-        "webpack": "~5.94.0"
+        "webpack": "~5.112.0"
     },
     "engines": {
         "node": ">= 18"
