@@ -1,0 +1,1496 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>佳誠電腦系統公司 | Great Smart Computer System Company — 全方位 IT 方案 · 1998 年成立</title>
+<meta name="description" content="佳誠電腦系統公司成立於1998年，提供網絡工程、雲端方案、網絡安全、AI Agent 客服、IT 外判支援等全方位 SI 服務。香港九龍灣自置客戶服務中心。">
+<style>
+  :root {
+    --navy: #0A2A5E;
+    --navy-dark: #061A3A;
+    --teal: #00C9A7;
+    --gold: #F5A623;
+    --ice: #EAF4FF;
+    --text: #1C2B3A;
+    --muted: #5A6B7B;
+    --card: #FFFFFF;
+    --radius: 18px;
+    --shadow: 0 18px 50px rgba(6, 26, 58, 0.12);
+    --font: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, -apple-system, sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: var(--font);
+    color: var(--text);
+    background: #F7FAFD;
+    line-height: 1.75;
+    overflow-x: hidden;
+  }
+  img { display: block; width: 100%; height: auto; object-fit: cover; }
+  a { color: inherit; text-decoration: none; }
+  .container { width: min(1200px, 92%); margin: 0 auto; }
+
+  /* ========== 頂部語言 + 聯絡列 ========== */
+  .topbar {
+    background: var(--navy-dark);
+    color: #B9CCE4;
+    font-size: 13px;
+    padding: 8px 0;
+    position: relative;
+    z-index: 60;
+  }
+  .topbar .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .topbar a { color: #B9CCE4; transition: .2s; }
+  .topbar a:hover { color: var(--teal); }
+  .lang-switch { display: flex; gap: 4px; }
+  .lang-btn {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,.25);
+    color: #B9CCE4;
+    padding: 3px 10px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: .25s;
+    font-family: inherit;
+  }
+  .lang-btn.active, .lang-btn:hover {
+    background: var(--teal);
+    border-color: var(--teal);
+    color: var(--navy-dark);
+    font-weight: 600;
+  }
+
+  /* ========== 導航欄 ========== */
+  .navbar {
+    position: sticky;
+    top: 0;
+    z-index: 55;
+    background: rgba(255,255,255,.92);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid rgba(10,42,94,.08);
+  }
+  .navbar .container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 0;
+    gap: 16px;
+  }
+  .logo-wrap { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+  .logo-mark { width: 52px; height: 52px; position: relative; flex-shrink: 0; }
+  .logo-mark svg { width: 100%; height: 100%; overflow: visible; }
+  .logo-core { animation: corePulse 2.8s ease-in-out infinite; transform-origin: center; }
+  @keyframes corePulse {
+    0%, 100% { filter: drop-shadow(0 0 2px rgba(0,201,167,.5)); }
+    50% { filter: drop-shadow(0 0 12px rgba(0,201,167,.95)); }
+  }
+  .logo-trace {
+    stroke-dasharray: 40;
+    stroke-dashoffset: 40;
+    animation: traceFlow 3.2s linear infinite;
+  }
+  .logo-trace:nth-child(2) { animation-delay: .4s; }
+  .logo-trace:nth-child(3) { animation-delay: .8s; }
+  .logo-trace:nth-child(4) { animation-delay: 1.2s; }
+  .logo-trace:nth-child(5) { animation-delay: 1.6s; }
+  .logo-trace:nth-child(6) { animation-delay: 2.0s; }
+  @keyframes traceFlow { to { stroke-dashoffset: -80; } }
+
+  .logo-text .zh { font-size: 18px; font-weight: 800; color: var(--navy); letter-spacing: .5px; line-height: 1.2; }
+  .logo-text .en { font-size: 10px; font-weight: 500; color: var(--muted); letter-spacing: 1.2px; text-transform: uppercase; }
+
+  .nav-links { display: flex; gap: 22px; font-size: 14px; font-weight: 600; color: var(--navy); flex-wrap: wrap; }
+  .nav-links a { position: relative; padding: 4px 0; transition: .2s; }
+  .nav-links a::after {
+    content: ''; position: absolute; left: 0; bottom: -2px; width: 0; height: 2px;
+    background: var(--teal); transition: width .3s ease;
+  }
+  .nav-links a:hover::after { width: 100%; }
+  .nav-links a:hover { color: var(--teal); }
+  .nav-cta {
+    background: var(--teal);
+    color: var(--navy-dark) !important;
+    padding: 9px 20px;
+    border-radius: 30px;
+    font-weight: 700 !important;
+    font-size: 13px;
+    white-space: nowrap;
+    transition: .25s;
+  }
+  .nav-cta:hover { background: #00E0BB; transform: translateY(-1px); }
+  .nav-cta::after { display: none !important; }
+
+  .mobile-toggle {
+    display: none;
+    background: none; border: none; font-size: 26px; cursor: pointer; color: var(--navy);
+  }
+
+  /* ========== HERO ========== */
+  .hero {
+    position: relative;
+    min-height: 92vh;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    background: var(--navy-dark);
+  }
+  .hero-bg {
+    position: absolute; inset: 0;
+    background: url('https://images.pexels.com/photos/325229/pexels-photo-325229.jpeg?auto=compress&cs=tinysrgb&w=1600') center/cover no-repeat;
+    opacity: .38;
+    transform: scale(1.05);
+    animation: heroKenBurns 22s ease-in-out infinite alternate;
+  }
+  @keyframes heroKenBurns {
+    0% { transform: scale(1.05) translate(0,0); }
+    100% { transform: scale(1.16) translate(-1.5%, -1.5%); }
+  }
+  .hero-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(105deg, rgba(6,26,58,.94) 0%, rgba(10,42,94,.78) 55%, rgba(10,42,94,.35) 100%);
+  }
+  .hero-grid-lines {
+    position: absolute; inset: 0; opacity: .12;
+    background-image:
+      linear-gradient(rgba(0,201,167,.4) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,201,167,.4) 1px, transparent 1px);
+    background-size: 60px 60px;
+    animation: gridShift 18s linear infinite;
+  }
+  @keyframes gridShift { to { background-position: 60px 60px; } }
+
+  .hero .container { position: relative; z-index: 3; padding: 100px 0 80px; }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(0,201,167,.14);
+    border: 1px solid rgba(0,201,167,.4);
+    color: var(--teal);
+    padding: 6px 16px; border-radius: 30px;
+    font-size: 12px; font-weight: 700; letter-spacing: .6px;
+    margin-bottom: 22px;
+    animation: fadeUp .8s .1s both;
+  }
+  .hero-badge .dot {
+    width: 7px; height: 7px; border-radius: 50%; background: var(--teal);
+    animation: blinkDot 1.6s ease-in-out infinite;
+  }
+  @keyframes blinkDot { 0%,100% { opacity: 1; } 50% { opacity: .2; } }
+
+  .hero h1 {
+    font-size: clamp(32px, 5.5vw, 58px);
+    font-weight: 900;
+    line-height: 1.18;
+    color: #fff;
+    max-width: 820px;
+    animation: fadeUp .8s .25s both;
+  }
+  .hero h1 span { color: var(--teal); }
+  .hero-sub {
+    color: #C5D8EE;
+    font-size: clamp(15px, 1.6vw, 18px);
+    max-width: 640px;
+    margin: 18px 0 34px;
+    animation: fadeUp .8s .4s both;
+  }
+  .hero-actions { display: flex; gap: 14px; flex-wrap: wrap; animation: fadeUp .8s .55s both; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 14px 30px; border-radius: 40px;
+    font-size: 14px; font-weight: 700; cursor: pointer;
+    transition: .28s; border: none; font-family: inherit;
+  }
+  .btn-primary { background: var(--teal); color: var(--navy-dark); }
+  .btn-primary:hover { background: #00E0BB; transform: translateY(-2px); box-shadow: 0 12px 30px rgba(0,201,167,.35); }
+  .btn-ghost { background: transparent; color: #fff; border: 1.5px solid rgba(255,255,255,.45); }
+  .btn-ghost:hover { border-color: var(--teal); color: var(--teal); }
+
+  .hero-stats {
+    display: flex; gap: 48px; flex-wrap: wrap;
+    margin-top: 56px; padding-top: 30px;
+    border-top: 1px solid rgba(255,255,255,.12);
+    animation: fadeUp .8s .7s both;
+  }
+  .hero-stat .num {
+    font-size: 34px; font-weight: 900; color: var(--teal); line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+  .hero-stat .num small { font-size: 18px; font-weight: 700; }
+  .hero-stat .label { font-size: 12px; color: #A0B8D4; margin-top: 6px; letter-spacing: .5px; }
+
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(28px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ========== 共用 Section ========== */
+  section { padding: 88px 0; }
+  .section-label {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 12px; font-weight: 800; letter-spacing: 2px;
+    color: var(--teal); text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .section-label::before { content: ''; width: 24px; height: 2px; background: var(--teal); }
+  .section-title {
+    font-size: clamp(26px, 3.6vw, 40px); font-weight: 900;
+    color: var(--navy); line-height: 1.25; margin-bottom: 14px;
+  }
+  .section-desc { color: var(--muted); max-width: 680px; font-size: 15px; }
+  .section-head { margin-bottom: 48px; }
+
+  /* ========== 關於我們 / 時間軸 ========== */
+  #about { background: #fff; }
+  .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
+  .about-visual { position: relative; border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); }
+  .about-visual img { height: 420px; transition: transform .6s ease; }
+  .about-visual:hover img { transform: scale(1.04); }
+  .about-visual::after {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(to top, rgba(6,26,58,.55), transparent 55%);
+  }
+  .about-year-tag {
+    position: absolute; bottom: 22px; left: 22px; z-index: 2;
+    background: var(--teal); color: var(--navy-dark);
+    padding: 10px 20px; border-radius: 12px;
+    font-weight: 900; font-size: 15px;
+    animation: glowTag 3s ease-in-out infinite;
+  }
+  @keyframes glowTag {
+    0%,100% { box-shadow: 0 0 0 rgba(0,201,167,0); }
+    50% { box-shadow: 0 0 24px rgba(0,201,167,.55); }
+  }
+  .about-points { display: grid; gap: 20px; margin-top: 28px; }
+  .about-point {
+    display: flex; gap: 16px; align-items: flex-start;
+    background: var(--ice); padding: 18px 20px; border-radius: 14px;
+    transition: .25s;
+  }
+  .about-point:hover { transform: translateX(6px); background: #E0EFFF; }
+  .about-point .ico {
+    width: 38px; height: 38px; border-radius: 10px;
+    background: var(--navy); color: var(--teal);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; font-weight: 900; flex-shrink: 0;
+  }
+  .about-point h4 { font-size: 15px; color: var(--navy); margin-bottom: 2px; }
+  .about-point p { font-size: 13px; color: var(--muted); }
+
+  /* ========== 服務矩陣 ========== */
+  #services { background: #F7FAFD; }
+  .services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 22px;
+  }
+  .service-card {
+    background: var(--card); border-radius: var(--radius);
+    overflow: hidden; box-shadow: 0 6px 24px rgba(6,26,58,.06);
+    transition: .35s; position: relative; border: 1px solid rgba(10,42,94,.05);
+  }
+  .service-card:hover { transform: translateY(-8px); box-shadow: 0 24px 48px rgba(6,26,58,.13); }
+  .service-card .thumb { height: 170px; overflow: hidden; position: relative; }
+  .service-card .thumb img { height: 100%; transition: transform .5s; }
+  .service-card:hover .thumb img { transform: scale(1.07); }
+  .service-card .thumb::after {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(to top, rgba(6,26,58,.5), transparent 50%);
+  }
+  .service-card .body { padding: 22px 22px 26px; }
+  .service-card h3 { font-size: 18px; color: var(--navy); margin-bottom: 8px; font-weight: 800; }
+  .service-card p { font-size: 13.5px; color: var(--muted); line-height: 1.7; }
+  .service-card .mini-tag {
+    display: inline-block; margin-top: 12px;
+    font-size: 11px; font-weight: 700; color: var(--teal);
+    background: rgba(0,201,167,.1); padding: 4px 12px; border-radius: 20px;
+  }
+
+  /* ========== 動畫展示區（數據流 + 15 動畫示意） ========== */
+  #animation-lab { background: var(--navy-dark); color: #fff; position: relative; overflow: hidden; }
+  .anim-bg-orbs {
+    position: absolute; inset: 0; pointer-events: none; overflow: hidden;
+  }
+  .orb {
+    position: absolute; border-radius: 50%;
+    background: radial-gradient(circle, rgba(0,201,167,.28), transparent 70%);
+    animation: orbFloat 14s ease-in-out infinite;
+  }
+  .orb:nth-child(1) { width: 380px; height: 380px; top: -120px; right: -80px; animation-delay: 0s; }
+  .orb:nth-child(2) { width: 260px; height: 260px; bottom: -60px; left: -40px; animation-delay: -5s; background: radial-gradient(circle, rgba(245,166,35,.2), transparent 70%); }
+  .orb:nth-child(3) { width: 200px; height: 200px; top: 40%; left: 45%; animation-delay: -9s; }
+  @keyframes orbFloat {
+    0%,100% { transform: translate(0,0) scale(1); }
+    33% { transform: translate(40px,-30px) scale(1.12); }
+    66% { transform: translate(-30px,20px) scale(.94); }
+  }
+
+  #animation-lab .section-title { color: #fff; }
+  #animation-lab .section-desc { color: #A0B8D4; }
+
+  .anim-showcase {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 18px;
+    position: relative; z-index: 2;
+    margin-top: 40px;
+  }
+  .anim-tile {
+    background: rgba(255,255,255,.05);
+    border: 1px solid rgba(255,255,255,.1);
+    border-radius: 16px;
+    padding: 26px 20px;
+    text-align: center;
+    transition: .3s;
+    backdrop-filter: blur(6px);
+  }
+  .anim-tile:hover { background: rgba(255,255,255,.1); border-color: rgba(0,201,167,.4); transform: translateY(-4px); }
+  .anim-tile .anim-icon {
+    width: 56px; height: 56px; margin: 0 auto 16px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .anim-tile h4 { font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 6px; }
+  .anim-tile p { font-size: 12px; color: #8FA8C4; line-height: 1.6; }
+
+  /* --- 15 組獨立動畫 --- */
+  .a-pulse { width: 40px; height: 40px; border-radius: 50%; background: var(--teal); animation: aPulse 1.8s ease-in-out infinite; }
+  @keyframes aPulse { 0%,100% { transform: scale(.85); opacity: .6; } 50% { transform: scale(1.15); opacity: 1; } }
+
+  .a-dash { width: 48px; height: 4px; border-radius: 4px; background: linear-gradient(90deg, var(--teal) 50%, rgba(255,255,255,.15) 50%); background-size: 200% 100%; animation: aDash 1.4s linear infinite; }
+  @keyframes aDash { to { background-position: -200% 0; } }
+
+  .a-rotate-ring { width: 38px; height: 38px; border: 3px solid rgba(0,201,167,.2); border-top-color: var(--teal); border-radius: 50%; animation: spin 1.1s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .a-orbit { width: 44px; height: 44px; position: relative; }
+  .a-orbit::before, .a-orbit::after { content: ''; position: absolute; border-radius: 50%; }
+  .a-orbit::before { inset: 0; border: 1.5px dashed rgba(0,201,167,.4); }
+  .a-orbit::after { width: 10px; height: 10px; background: var(--gold); top: -3px; left: 50%; margin-left: -5px; animation: orbit 2.4s linear infinite; transform-origin: 5px 25px; }
+  @keyframes orbit { to { transform: rotate(360deg); } }
+
+  .a-bar { display: flex; gap: 5px; align-items: flex-end; height: 36px; }
+  .a-bar span { width: 6px; background: var(--teal); border-radius: 3px; animation: barJump 1s ease-in-out infinite; }
+  .a-bar span:nth-child(1) { height: 16px; animation-delay: 0s; }
+  .a-bar span:nth-child(2) { height: 30px; animation-delay: .15s; }
+  .a-bar span:nth-child(3) { height: 22px; animation-delay: .3s; }
+  .a-bar span:nth-child(4) { height: 36px; animation-delay: .45s; }
+  @keyframes barJump { 0%,100% { transform: scaleY(.55); } 50% { transform: scaleY(1); } }
+
+  .a-grid-pulse { width: 44px; height: 44px; background-image: radial-gradient(var(--teal) 1.5px, transparent 1.5px); background-size: 11px 11px; animation: gridPulse 2s ease-in-out infinite; }
+  @keyframes gridPulse { 0%,100% { opacity: .35; } 50% { opacity: 1; } }
+
+  .a-scan { width: 44px; height: 36px; border: 1.5px solid rgba(0,201,167,.35); border-radius: 6px; position: relative; overflow: hidden; }
+  .a-scan::after { content: ''; position: absolute; left: 0; right: 0; height: 2px; background: var(--teal); top: 0; animation: scanMove 2s linear infinite; box-shadow: 0 0 8px var(--teal); }
+  @keyframes scanMove { to { top: 100%; } }
+
+  .a-dots { display: flex; gap: 7px; }
+  .a-dots span { width: 9px; height: 9px; border-radius: 50%; background: var(--teal); animation: dotFade 1.4s ease-in-out infinite; }
+  .a-dots span:nth-child(2) { animation-delay: .2s; }
+  .a-dots span:nth-child(3) { animation-delay: .4s; }
+  @keyframes dotFade { 0%,100% { opacity: .2; transform: scale(.8); } 50% { opacity: 1; transform: scale(1.1); } }
+
+  .a-morph { width: 38px; height: 38px; background: var(--teal); border-radius: 10px; animation: morph 2.2s ease-in-out infinite; }
+  @keyframes morph { 0%,100% { border-radius: 10px; transform: rotate(0); } 50% { border-radius: 50%; transform: rotate(90deg); } }
+
+  .a-wave { width: 48px; height: 30px; display: flex; align-items: center; gap: 3px; }
+  .a-wave span { flex: 1; height: 6px; background: var(--teal); border-radius: 3px; animation: wave 1.2s ease-in-out infinite; }
+  .a-wave span:nth-child(2) { animation-delay: .1s; }
+  .a-wave span:nth-child(3) { animation-delay: .2s; }
+  .a-wave span:nth-child(4) { animation-delay: .3s; }
+  .a-wave span:nth-child(5) { animation-delay: .4s; }
+  @keyframes wave { 0%,100% { transform: scaleY(1); } 50% { transform: scaleY(2.4); } }
+
+  .a-blink-cursor { width: 3px; height: 30px; background: var(--teal); animation: blinkCursor 1s step-end infinite; }
+  @keyframes blinkCursor { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
+
+  .a-float { width: 34px; height: 34px; background: rgba(0,201,167,.15); border: 1.5px solid var(--teal); border-radius: 8px; animation: floatY 3s ease-in-out infinite; }
+  @keyframes floatY { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+
+  .a-radar { width: 44px; height: 44px; border-radius: 50%; border: 1.5px solid rgba(0,201,167,.3); position: relative; overflow: hidden; }
+  .a-radar::before { content: ''; position: absolute; inset: 0; border-radius: 50%; background: conic-gradient(from 0deg, rgba(0,201,167,.55), transparent 25%); animation: spin 2.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .a-shield { width: 36px; height: 40px; background: linear-gradient(180deg, var(--teal), rgba(0,201,167,.25)); clip-path: polygon(50% 0%, 100% 22%, 100% 70%, 50% 100%, 0 70%, 0 22%); animation: shieldGlow 2.4s ease-in-out infinite; }
+  @keyframes shieldGlow { 0%,100% { filter: drop-shadow(0 0 2px rgba(0,201,167,.4)); } 50% { filter: drop-shadow(0 0 14px rgba(0,201,167,.9)); } }
+
+  .a-cloud { width: 46px; height: 30px; position: relative; }
+  .a-cloud::before, .a-cloud::after { content: ''; position: absolute; background: var(--teal); border-radius: 50%; }
+  .a-cloud::before { width: 22px; height: 22px; top: 4px; left: 0; }
+  .a-cloud::after { width: 28px; height: 28px; top: 0; right: 0; }
+  .a-cloud span { position: absolute; bottom: 0; left: 6px; width: 34px; height: 14px; background: var(--teal); border-radius: 7px; animation: cloudBob 3s ease-in-out infinite; }
+  @keyframes cloudBob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+
+  .a-arrow-flow { display: flex; align-items: center; gap: 6px; color: var(--teal); font-size: 22px; font-weight: 900; }
+  .a-arrow-flow span { animation: arrowSlide 1.4s ease-in-out infinite; }
+  .a-arrow-flow span:nth-child(2) { animation-delay: .2s; }
+  .a-arrow-flow span:nth-child(3) { animation-delay: .4s; }
+  @keyframes arrowSlide { 0%,100% { opacity: .3; transform: translateX(0); } 50% { opacity: 1; transform: translateX(4px); } }
+
+  /* ========== AI Agent 專區 ========== */
+  #ai-agent { background: #fff; }
+  .ai-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 50px; align-items: center; }
+  .ai-visual { position: relative; border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); }
+  .ai-visual img { height: 400px; }
+  .ai-visual .ai-badge {
+    position: absolute; top: 18px; left: 18px;
+    background: rgba(6,26,58,.82); backdrop-filter: blur(8px);
+    color: var(--teal); padding: 8px 16px; border-radius: 30px;
+    font-size: 11px; font-weight: 800; letter-spacing: 1px;
+    display: flex; align-items: center; gap: 7px;
+    border: 1px solid rgba(0,201,167,.35);
+  }
+  .ai-badge .live-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--teal); animation: blinkDot 1.2s infinite; }
+
+  .ai-features { display: grid; gap: 14px; margin-top: 26px; }
+  .ai-feature {
+    display: flex; gap: 14px; align-items: flex-start;
+    padding: 16px 18px; border-radius: 12px;
+    background: var(--ice); border-left: 3px solid var(--teal);
+    transition: .25s;
+  }
+  .ai-feature:hover { background: #E0EFFF; transform: translateX(4px); }
+  .ai-feature .num {
+    font-size: 20px; font-weight: 900; color: var(--teal); line-height: 1; min-width: 28px;
+  }
+  .ai-feature h4 { font-size: 14.5px; color: var(--navy); margin-bottom: 2px; }
+  .ai-feature p { font-size: 12.5px; color: var(--muted); line-height: 1.6; }
+
+  .ai-demo-note {
+    margin-top: 20px; padding: 14px 18px;
+    background: var(--navy); color: #C5D8EE;
+    border-radius: 12px; font-size: 13px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .ai-demo-note strong { color: var(--teal); }
+
+  /* ========== 支付方式 ========== */
+  #payments { background: var(--ice); }
+  .pay-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 18px;
+  }
+  .pay-card {
+    background: #fff; border-radius: 16px; padding: 28px 20px;
+    text-align: center; box-shadow: 0 4px 18px rgba(6,26,58,.06);
+    transition: .3s; border: 1px solid rgba(10,42,94,.06);
+  }
+  .pay-card:hover { transform: translateY(-5px); box-shadow: 0 16px 36px rgba(6,26,58,.12); }
+  .pay-card .pay-icon {
+    width: 58px; height: 58px; margin: 0 auto 14px;
+    border-radius: 16px; display: flex; align-items: center; justify-content: center;
+    font-size: 24px; font-weight: 900;
+  }
+  .pay-octopus { background: #F5A623; color: #fff; }
+  .pay-alipay { background: #1677FF; color: #fff; }
+  .pay-wechat { background: #07C160; color: #fff; }
+  .pay-card h4 { font-size: 15px; color: var(--navy); font-weight: 800; margin-bottom: 4px; }
+  .pay-card p { font-size: 12px; color: var(--muted); }
+
+  /* ========== 聯絡 + 表單 ========== */
+  #contact { background: var(--navy-dark); color: #fff; }
+  #contact .section-title { color: #fff; }
+  #contact .section-desc { color: #A0B8D4; }
+  .contact-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 50px; }
+  .contact-info-list { display: grid; gap: 18px; margin-top: 10px; }
+  .contact-item {
+    display: flex; gap: 16px; align-items: flex-start;
+    background: rgba(255,255,255,.05); padding: 18px 20px;
+    border-radius: 12px; border: 1px solid rgba(255,255,255,.08);
+    transition: .25s;
+  }
+  .contact-item:hover { border-color: rgba(0,201,167,.35); background: rgba(255,255,255,.08); }
+  .contact-item .ci-icon {
+    width: 38px; height: 38px; border-radius: 10px;
+    background: rgba(0,201,167,.15); color: var(--teal);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; flex-shrink: 0;
+  }
+  .contact-item .ci-label { font-size: 11px; color: #8FA8C4; letter-spacing: 1px; margin-bottom: 2px; }
+  .contact-item .ci-value { font-size: 14px; color: #fff; font-weight: 600; line-height: 1.5; }
+  .contact-item .ci-value a { color: var(--teal); }
+  .contact-item .ci-value a:hover { text-decoration: underline; }
+
+  .contact-form {
+    background: rgba(255,255,255,.05);
+    border: 1px solid rgba(255,255,255,.1);
+    border-radius: var(--radius);
+    padding: 34px 30px;
+    backdrop-filter: blur(8px);
+  }
+  .contact-form h3 { font-size: 20px; margin-bottom: 6px; color: #fff; }
+  .contact-form .cf-sub { font-size: 13px; color: #8FA8C4; margin-bottom: 24px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-group label { font-size: 12px; color: #A0B8D4; font-weight: 600; }
+  .form-group input, .form-group textarea, .form-group select {
+    background: rgba(255,255,255,.08);
+    border: 1px solid rgba(255,255,255,.14);
+    border-radius: 10px; padding: 12px 14px;
+    color: #fff; font-family: inherit; font-size: 13.5px;
+    outline: none; transition: .25s;
+  }
+  .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+    border-color: var(--teal); background: rgba(255,255,255,.12);
+    box-shadow: 0 0 0 3px rgba(0,201,167,.12);
+  }
+  .form-group textarea { min-height: 110px; resize: vertical; }
+  .form-group select option { background: var(--navy-dark); color: #fff; }
+  .form-submit {
+    width: 100%; margin-top: 8px;
+    background: var(--teal); color: var(--navy-dark);
+    border: none; padding: 15px; border-radius: 30px;
+    font-size: 15px; font-weight: 800; cursor: pointer;
+    font-family: inherit; transition: .25s;
+  }
+  .form-submit:hover { background: #00E0BB; transform: translateY(-1px); box-shadow: 0 10px 28px rgba(0,201,167,.3); }
+
+  /* ========== Footer ========== */
+  footer {
+    background: #040F1F; color: #6B829B;
+    padding: 44px 0 28px; font-size: 12.5px;
+  }
+  .footer-top {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    flex-wrap: wrap; gap: 30px;
+    padding-bottom: 26px; border-bottom: 1px solid rgba(255,255,255,.06);
+  }
+  .footer-brand .fb-name { font-size: 16px; font-weight: 800; color: #fff; margin-bottom: 4px; }
+  .footer-brand .fb-sub { font-size: 11px; color: #5A7390; letter-spacing: .5px; }
+  .footer-links { display: flex; gap: 26px; flex-wrap: wrap; }
+  .footer-links a { color: #8FA8C4; transition: .2s; }
+  .footer-links a:hover { color: var(--teal); }
+  .footer-bottom { padding-top: 22px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; font-size: 11.5px; }
+
+  /* ========== AI Chat Widget ========== */
+  .ai-chat-fab {
+    position: fixed; bottom: 26px; right: 26px; z-index: 100;
+    width: 62px; height: 62px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--teal), #0088CC);
+    color: #fff; border: none; cursor: pointer;
+    font-size: 28px; display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 10px 32px rgba(0,201,167,.45);
+    transition: .3s;
+    animation: fabPulse 2.6s ease-in-out infinite;
+  }
+  .ai-chat-fab:hover { transform: scale(1.08); }
+  @keyframes fabPulse {
+    0%,100% { box-shadow: 0 10px 32px rgba(0,201,167,.45); }
+    50% { box-shadow: 0 10px 46px rgba(0,201,167,.75); }
+  }
+
+  .ai-chat-panel {
+    position: fixed; bottom: 100px; right: 26px; z-index: 101;
+    width: 370px; max-width: calc(100vw - 40px);
+    background: #fff; border-radius: 20px;
+    box-shadow: 0 24px 70px rgba(6,26,58,.25);
+    display: none; flex-direction: column;
+    overflow: hidden;
+    border: 1px solid rgba(10,42,94,.08);
+  }
+  .ai-chat-panel.open { display: flex; }
+  .acp-head {
+    background: var(--navy); color: #fff;
+    padding: 16px 18px; display: flex; justify-content: space-between; align-items: center;
+  }
+  .acp-head .ach-left { display: flex; align-items: center; gap: 10px; }
+  .acp-avatar {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: var(--teal); color: var(--navy-dark);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 900; font-size: 14px;
+  }
+  .acp-head h4 { font-size: 14px; font-weight: 700; }
+  .acp-head .acp-status { font-size: 10px; color: var(--teal); display: flex; align-items: center; gap: 4px; }
+  .acp-status .s-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--teal); animation: blinkDot 1.4s infinite; }
+  .acp-close { background: none; border: none; color: #8FA8C4; font-size: 22px; cursor: pointer; line-height: 1; }
+
+  .acp-body {
+    height: 320px; overflow-y: auto; padding: 16px;
+    display: flex; flex-direction: column; gap: 12px;
+    background: #F7FAFD;
+  }
+  .acp-msg { max-width: 86%; padding: 11px 14px; border-radius: 14px; font-size: 13px; line-height: 1.6; }
+  .acp-msg.bot { background: #fff; align-self: flex-start; border-bottom-left-radius: 4px; box-shadow: 0 2px 8px rgba(6,26,58,.06); }
+  .acp-msg.user { background: var(--navy); color: #fff; align-self: flex-end; border-bottom-right-radius: 4px; }
+  .acp-quick { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 16px 12px; background: #F7FAFD; }
+  .acp-quick button {
+    background: #fff; border: 1px solid rgba(10,42,94,.12);
+    color: var(--navy); padding: 5px 12px; border-radius: 20px;
+    font-size: 11px; cursor: pointer; font-family: inherit;
+    transition: .2s;
+  }
+  .acp-quick button:hover { border-color: var(--teal); color: var(--teal); }
+  .acp-input-row {
+    display: flex; gap: 8px; padding: 12px 14px;
+    border-top: 1px solid rgba(10,42,94,.06); background: #fff;
+  }
+  .acp-input-row input {
+    flex: 1; border: 1px solid rgba(10,42,94,.12);
+    border-radius: 22px; padding: 10px 16px;
+    font-size: 13px; font-family: inherit; outline: none;
+  }
+  .acp-input-row input:focus { border-color: var(--teal); }
+  .acp-input-row button {
+    background: var(--teal); color: var(--navy-dark);
+    border: none; border-radius: 50%; width: 42px; height: 42px;
+    font-size: 17px; cursor: pointer; flex-shrink: 0;
+    transition: .2s;
+  }
+  .acp-input-row button:hover { background: #00E0BB; }
+
+  /* ========== 響應式 ========== */
+  @media (max-width: 900px) {
+    .about-grid, .ai-layout, .contact-layout { grid-template-columns: 1fr; gap: 36px; }
+    .nav-links { display: none; }
+    .mobile-toggle { display: block; }
+    .nav-links.mobile-open {
+      display: flex; flex-direction: column;
+      position: absolute; top: 100%; left: 0; right: 0;
+      background: #fff; padding: 20px; gap: 14px;
+      box-shadow: 0 20px 40px rgba(6,26,58,.12);
+      border-bottom: 1px solid rgba(10,42,94,.08);
+    }
+    .hero-stats { gap: 26px; }
+    .form-row { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 520px) {
+    .hero .container { padding: 70px 0 50px; }
+    .hero-stats { flex-direction: column; gap: 18px; }
+    .section-head { margin-bottom: 30px; }
+    section { padding: 60px 0; }
+    .ai-chat-panel { right: 10px; bottom: 90px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ==================== 語言切換 + 頂部資訊 ==================== -->
+<div class="topbar">
+  <div class="container">
+    <div style="display:flex;gap:18px;flex-wrap:wrap;">
+      <a href="tel:+85228668716">📞 (852) 2866 8716</a>
+      <a href="mailto:info@greatsmart.com.hk">✉ info@greatsmart.com.hk</a>
+      <span style="color:#5A7390;">|</span>
+      <a href="https://wa.me/85293681251" target="_blank">WhatsApp / WeChat: (852) 9368 1251</a>
+    </div>
+    <div class="lang-switch" id="langSwitch">
+      <button class="lang-btn active" data-lang="zh-Hant">繁</button>
+      <button class="lang-btn" data-lang="zh-Hans">简</button>
+      <button class="lang-btn" data-lang="en">EN</button>
+      <button class="lang-btn" data-lang="ja">日本語</button>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 導航 ==================== -->
+<nav class="navbar">
+  <div class="container" style="position:relative;">
+    <a href="#" class="logo-wrap">
+      <div class="logo-mark">
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <!-- 六邊形外框 -->
+          <polygon points="50,6 91,28 91,72 50,94 9,72 9,28" fill="none" stroke="#0A2A5E" stroke-width="4" stroke-linejoin="round"/>
+          <!-- 6 條電路 trace -->
+          <line class="logo-trace" x1="16" y1="82" x2="50" y2="50" stroke="#00C9A7" stroke-width="2.5" stroke-linecap="round"/>
+          <line class="logo-trace" x1="12" y1="58" x2="50" y2="50" stroke="#00C9A7" stroke-width="2.5" stroke-linecap="round"/>
+          <line class="logo-trace" x1="18" y1="30" x2="50" y2="50" stroke="#00C9A7" stroke-width="2.5" stroke-linecap="round"/>
+          <line class="logo-trace" x1="84" y1="82" x2="50" y2="50" stroke="#F5A623" stroke-width="2.5" stroke-linecap="round"/>
+          <line class="logo-trace" x1="88" y1="58" x2="50" y2="50" stroke="#F5A623" stroke-width="2.5" stroke-linecap="round"/>
+          <line class="logo-trace" x1="82" y1="30" x2="50" y2="50" stroke="#F5A623" stroke-width="2.5" stroke-linecap="round"/>
+          <!-- 智能核心晶片 -->
+          <circle class="logo-core" cx="50" cy="50" r="15" fill="#0A2A5E"/>
+          <text x="50" y="56" text-anchor="middle" font-size="15" font-weight="900" fill="#00C9A7" font-family="Arial, sans-serif">GS</text>
+          <!-- 外圍三顆 AI/Cloud/Security 光點 -->
+          <circle cx="50" cy="6" r="3.5" fill="#F5A623">
+            <animate attributeName="opacity" values="1;.3;1" dur="2s" repeatCount="indefinite"/>
+          </circle>
+          <circle cx="91" cy="72" r="3.5" fill="#00C9A7">
+            <animate attributeName="opacity" values="1;.3;1" dur="2s" begin=".7s" repeatCount="indefinite"/>
+          </circle>
+          <circle cx="9" cy="72" r="3.5" fill="#00C9A7">
+            <animate attributeName="opacity" values="1;.3;1" dur="2s" begin="1.3s" repeatCount="indefinite"/>
+          </circle>
+        </svg>
+      </div>
+      <div class="logo-text">
+        <div class="zh">佳誠電腦系統公司</div>
+        <div class="en">Great Smart Computer System</div>
+      </div>
+    </a>
+    <button class="mobile-toggle" id="mobileToggle" aria-label="Menu">☰</button>
+    <div class="nav-links" id="navLinks">
+      <a href="#about" data-i18n="nav_about">關於佳誠</a>
+      <a href="#services" data-i18n="nav_services">服務方案</a>
+      <a href="#animation-lab" data-i18n="nav_animation">科技動能</a>
+      <a href="#ai-agent" data-i18n="nav_ai">AI Agent</a>
+      <a href="#payments" data-i18n="nav_payments">支付方式</a>
+      <a href="#contact" class="nav-cta" data-i18n="nav_cta">免費諮詢</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ==================== HERO ==================== -->
+<header class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-overlay"></div>
+  <div class="hero-grid-lines"></div>
+  <div class="container">
+    <div class="hero-badge">
+      <span class="dot"></span>
+      <span data-i18n="hero_badge">1998 年成立 · 香港自置客戶服務中心 · 全方位 SI 夥伴</span>
+    </div>
+    <h1 data-i18n="hero_title">連接通向智能未來的<br><span>全方位 IT 方案</span></h1>
+    <p class="hero-sub" data-i18n="hero_sub">佳誠電腦系統公司自 1998 年扎根九龍灣，為香港企業提供網絡工程、雲端轉型、網絡安全、AI Agent 客服與一站式 IT 外判支援。從 SI 到 Smart，我們讓科技真正驅動業務。</p>
+    <div class="hero-actions">
+      <a href="#services" class="btn btn-primary" data-i18n="hero_cta1">探索服務方案 →</a>
+      <a href="#contact" class="btn btn-ghost" data-i18n="hero_cta2">預約免費評估</a>
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <div class="num">1998</div>
+        <div class="label" data-i18n="stat_year">成立年份</div>
+      </div>
+      <div class="hero-stat">
+        <div class="num">27<small>+</small></div>
+        <div class="label" data-i18n="stat_exp">年 IT 行業經驗</div>
+      </div>
+      <div class="hero-stat">
+        <div class="num">1000<small>+</small></div>
+        <div class="label" data-i18n="stat_client">企業客戶信賴</div>
+      </div>
+      <div class="hero-stat">
+        <div class="num">24/7</div>
+        <div class="label" data-i18n="stat_support">AI + 真人支援</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ==================== 關於我們 ==================== -->
+<section id="about">
+  <div class="container">
+    <div class="about-grid">
+      <div class="about-visual">
+        <img src="https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg?auto=compress&cs=tinysrgb&w=800" alt="佳誠電腦系統公司 IT 團隊協作場景" loading="lazy">
+        <div class="about-year-tag" data-i18n="about_tag">Since 1998 · 香港</div>
+      </div>
+      <div>
+        <div class="section-label" data-i18n="about_label">關於佳誠</div>
+        <h2 class="section-title" data-i18n="about_title">從系統整合到智能驅動，27 年堅持同一件事</h2>
+        <p class="section-desc" data-i18n="about_desc">佳誠電腦系統公司成立於 1998 年，是香港本地少數同時具備網絡基建、雲端方案、資訊安全與 AI 應用整合能力的全方位 SI 供應商。我們以九龍灣為基地，服務遍及零售、物流、專業服務、教育與中小企，始終堅持「先理解業務，再交付科技」。</p>
+        <div class="about-points">
+          <div class="about-point">
+            <div class="ico">01</div>
+            <div>
+              <h4 data-i18n="about_p1_t">自置客戶服務中心</h4>
+              <p data-i18n="about_p1_d">九龍灣宏開道據點，設備展示、測試與客戶支援一站式進行。</p>
+            </div>
+          </div>
+          <div class="about-point">
+            <div class="ico">02</div>
+            <div>
+              <h4 data-i18n="about_p2_t">跨領域認證工程團隊</h4>
+              <p data-i18n="about_p2_d">網絡、雲端、安全與 AI 工程師協同作業，避免多頭供應商碎片化。</p>
+            </div>
+          </div>
+          <div class="about-point">
+            <div class="ico">03</div>
+            <div>
+              <h4 data-i18n="about_p3_t">AI Agent 落地能力</h4>
+              <p data-i18n="about_p3_d">不只賣工具，更協助企業梳理知識庫、設定 AI 邊界與人工接手流程。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== 服務矩陣 ==================== -->
+<section id="services">
+  <div class="container">
+    <div class="section-head">
+      <div class="section-label" data-i18n="serv_label">服務方案</div>
+      <h2 class="section-title" data-i18n="serv_title">全方位 IT 服務，覆蓋企業每一個技術斷點</h2>
+      <p class="section-desc" data-i18n="serv_desc">由底層網絡到前端智能應用，佳誠以模組化方式交付，企業可按需起點，逐步擴展。</p>
+    </div>
+    <div class="services-grid">
+      <!-- 1 網絡工程 -->
+      <div class="service-card">
+        <div class="thumb"><img src="https://images.pexels.com/photos/2881232/pexels-photo-2881232.jpeg?auto=compress&cs=tinysrgb&w=600" alt="結構化佈線與網絡工程" loading="lazy"></div>
+        <div class="body">
+          <h3 data-i18n="s1_t">網絡工程與結構化佈線</h3>
+          <p data-i18n="s1_d">企業 LAN/WAN、Wi-Fi 6/7 部署、光纖與 Cat6A 佈線、多站點 VPN 互聯，從設計到認證測試一站式交付。</p>
+          <span class="mini-tag" data-i18n="s1_tag">Cisco · H3C · Ubiquiti</span>
+        </div>
+      </div>
+      <!-- 2 雲端 -->
+      <div class="service-card">
+        <div class="thumb"><img src="https://images.pexels.com/photos/1148820/pexels-photo-1148820.jpeg?auto=compress&cs=tinysrgb&w=600" alt="雲端運算與數據中心" loading="lazy"></div>
+        <div class="body">
+          <h3 data-i18n="s2_t">雲端方案與混合架構</h3>
+          <p data-i18n="s2_d">Microsoft 365、Azure、AWS 遷移與治理，混合雲備份、災難復原與成本優化，讓雲端真正可控。</p>
+          <span class="mini-tag" data-i18n="s2_tag">Azure · AWS · M365</span>
+        </div>
+      </div>
+      <!-- 3 網絡安全 -->
+      <div class="service-card">
+        <div class="thumb"><img src="https://images.pexels.com/photos/60504/security-protection-anti-virus-software-60504.jpeg?auto=compress&cs=tinysrgb&w=600" alt="網絡安全防護" loading="lazy"></div>
+        <div class="body">
+          <h3 data-i18n="s3_t">網絡安全與合規</h3>
+          <p data-i18n="s3_d">防火牆、端點防護、電郵安全、滲透測試與 ISO 27001 合規輔導，為企業建立縱深防禦。</p>
+          <span class="mini-tag" data-i18n="s3_tag">Fortinet · Sophos · ISO 27001</span>
+        </div>
+      </div>
+      <!-- 4 伺服器 -->
+      <div class="service-card">
+        <div class="thumb"><img src="https://images.pexels.com/photos/325229/pexels-photo-325229.jpeg?auto=compress&cs=tinysrgb&w=600" alt="伺服器與儲存方案" loading="lazy"></div>
+        <div class="body">
+          <h3 data-i18n="s4_t">伺服器與企業儲存</h3>
+          <p data-i18n="s4_d">Windows Server、Linux、NAS/SAN 規劃，虛擬化與超融合架構，高效能儲存滿足業務增長。</p>
+          <span class="mini-tag" data-i18n="s4_tag">VMware · Synology · Dell</span>
+        </div>
+      </div>
+      <!-- 5 IT 外判 -->
+      <div class="service-card">
+        <div class="thumb"><img src="https://images.pexels.com/photos/1181244/pexels-photo-1181244.jpeg?auto=compress&cs=tinysrgb&w=600" alt="IT 外判與技術支援" loading="lazy"></div>
+        <div class="body">
+          <h3 data-i18n="s5_t">IT 外判與 Helpdesk</h3>
+          <p data-i18n="s5_d">按用戶數或設備數計費的月費支援，遠端 + 到場混合模式，讓中小企擁有企業級 IT 部門。</p>
+          <span class="mini-tag" data-i18n="s5_tag">月費計劃 · 遠端 + 到場</span>
+        </div>
+      </div>
+      <!-- 6 AI Agent -->
+      <div class="service-card">
+        <div class="thumb"><img src="https://images.pexels.com/photos/8386434/pexels-photo-8386434.jpeg?auto=compress&cs=tinysrgb&w=600" alt="AI Agent 智能客服與自動化" loading="lazy"></div>
+        <div class="body">
+          <h3 data-i18n="s6_t">AI Agent 客服與流程自動化</h3>
+          <p data-i18n="s6_d">整合網站、WhatsApp 與知識庫，AI 先答常見問題，複雜個案連對話記錄轉真人，實現 24/7 智能應對。</p>
+          <span class="mini-tag" data-i18n="s6_tag">GPTBots · API 整合 · 多渠道</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== 動畫展示區 ==================== -->
+<section id="animation-lab">
+  <div class="anim-bg-orbs">
+    <div class="orb"></div><div class="orb"></div><div class="orb"></div>
+  </div>
+  <div class="container">
+    <div class="section-head">
+      <div class="section-label" data-i18n="anim_label">科技動能</div>
+      <h2 class="section-title" data-i18n="anim_title">15 組科技動畫，讓系統的「運轉感」被看見</h2>
+      <p class="section-desc" data-i18n="anim_desc">從數據流動、安全掃描到 AI 脈衝，每個動畫都對應佳誠方案中的一個真實能力維度。</p>
+    </div>
+    <div class="anim-showcase">
+      <div class="anim-tile"><div class="anim-icon"><div class="a-pulse"></div></div><h4 data-i18n="a1">AI 脈衝核心</h4><p data-i18n="a1d">智能運算持續活躍</p></div>
+      <div class="anim-tile"><div class="anim-icon"><div class="a-dash"></div></div><h4 data-i18n="a2">數據流光</h4><p data-i18n="a2d">網絡封包高速傳輸</p></div>
+      <div class="anim-tile"><div class="anim-icon"><div class="a-rotate-ring"></div></div><h4 data-i18n="a3">系統負載</h4><p data-i18n="a3d">運算資源循環調度</p></div>
+      <div class="anim-tile"><div class="anim-icon"><div class="a-orbit"></div></div><h4 data-i18n="a4">雲端軌道</h4><p data-i18n="a4d">多雲節點環繞協同</p></div>
+      <div class="anim-tile"><div class="anim-icon"><div class="a-bar"><span></span><span></span><span></span><span></span></div></div><h4 data-i18n="a5">效能監測</h4><p data-i18n="a5d">即時資源使用率</p></div>
+      <div class="anim-tile"><div class="anim-icon"><div class="a-grid-pulse"></div></div><h4 data-i18n="a6">網格覺醒</h4><p data-i18n="a6d">網絡節點逐一連通</p></div>
+      <div class="anim-tile"><div class="anim-icon"><div class="a-scan"></div></div><h4 data-i18n="a7">安全掃描</h4><p data-i18n="a7d">威脅偵測不間斷</p></div>
+      <div class="anim-tile"><div class="anim-icon"><div class="a-dots"><span></span><span></span><span></span></div></div><h4 data-i18n="a8">多點連線</h4><p data-i18n="a8d">跨裝置同步在線</p></div>
+      <div class="anim-tile"><div class="anim-icon"><div class="a-morph"></div></div><h4 data-i18n="a9">形態轉換</h4><p data-i18n="a9d">靈活架構隨需而變</p></div>
+      <div class="anim-tile"><div class="anim-icon"><div class="a-wave"><span></span><span></span><span></span><span></span><span></span></div></div><h4 data-i18n="a10">訊號波形</h4><p data-i18n="a10d">網絡健康即時反饋</p></div>
+      <div class="anim-tile"><div class="anim-icon"><div class="a-blink-cursor"></div></div><h4 data-i18n="a11">智能輸入</h4><p data-i18n="a11d">AI 對話即時響應</p></div>
+      <div class="anim-tile"><div class="anim-icon"><div class="a-float"></div></div><h4 data-i18n="a12">雲端浮動</h4><p data-i18n="a12d">資源彈性伸縮</p></div>
+      <div class="anim-tile"><div class="anim-icon"><div class="a-radar"></div></div><h4 data-i18n="a13">雷達偵測</h4><p data-i18n="a13d">異常行為持續掃描</p></div>
+      <div class="anim-tile"><div class="anim-icon"><div class="a-shield"></div></div><h4 data-i18n="a14">安全護盾</h4><p data-i18n="a14d">縱深防禦持續在線</p></div>
+      <div class="anim-tile"><div class="anim-icon"><div class="a-cloud"><span></span></div></div><h4 data-i18n="a15">混合雲層</h4><p data-i18n="a15d">公有雲 + 私有雲協作</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== AI Agent 專區 ==================== -->
+<section id="ai-agent">
+  <div class="container">
+    <div class="ai-layout">
+      <div class="ai-visual">
+        <img src="https://images.pexels.com/photos/8386440/pexels-photo-8386440.jpeg?auto=compress&cs=tinysrgb&w=800" alt="AI Agent 智能客服整合介面" loading="lazy">
+        <div class="ai-badge"><span class="live-dot"></span> AI Agent · Always On</div>
+      </div>
+      <div>
+        <div class="section-label" data-i18n="ai_label">AI Agent 整合</div>
+        <h2 class="section-title" data-i18n="ai_title">不只是聊天機械人，而是真正能接住業務的 AI 同事</h2>
+        <p class="section-desc" data-i18n="ai_desc">佳誠將 AI Agent 接入企業網站、WhatsApp 與知識庫，處理常見查詢、分流複雜個案、記錄對話上下文，並在需要時無縫轉交真人。香港中小企可按低風險場景起步，逐步擴展。</p>
+        <div class="ai-features">
+          <div class="ai-feature"><div class="num">01</div><div><h4 data-i18n="ai_f1_t">多渠道統一接入</h4><p data-i18n="ai_f1_d">網站聊天、WhatsApp、WeChat 消息統一後台管理，不遺漏任何查詢。</p></div></div>
+          <div class="ai-feature"><div class="num">02</div><div><h4 data-i18n="ai_f2_t">知識庫 + API 深度整合</h4><p data-i18n="ai_f2_d">讀取產品資料、訂單狀態與內部文件，AI 回答有依據、可追溯。</p></div></div>
+          <div class="ai-feature"><div class="num">03</div><div><h4 data-i18n="ai_f3_t">權限與安全邊界</h4><p data-i18n="ai_f3_d">按角色設定 AI 可讀取的數據範圍，個人信息傳入模型前匿名化處理。</p></div></div>
+          <div class="ai-feature"><div class="num">04</div><div><h4 data-i18n="ai_f4_t">無縫轉真人</h4><p data-i18n="ai_f4_d">複雜或不滿個案連同完整對話記錄轉交客服，客戶無需重複描述問題。</p></div></div>
+        </div>
+        <div class="ai-demo-note"><span>💬</span><span data-i18n="ai_demo_note">點擊右下角 <strong>AI 懸浮按鈕</strong>，即時體驗佳誠 AI Agent 的網站接待流程。</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== 支付方式 ==================== -->
+<section id="payments">
+  <div class="container">
+    <div class="section-head">
+      <div class="section-label" data-i18n="pay_label">支付方式</div>
+      <h2 class="section-title" data-i18n="pay_title">支援香港主流支付，付款流程簡單直接</h2>
+      <p class="section-desc" data-i18n="pay_desc">佳誠的項目報價與服務費用支援以下支付方式，企業客戶亦可選擇銀行轉賬或月結安排。</p>
+    </div>
+    <div class="pay-grid">
+      <div class="pay-card">
+        <div class="pay-icon pay-octopus">O</div>
+        <h4>八達通 / Octopus</h4>
+        <p data-i18n="pay_octopus">支援網上及線下拍卡付款</p>
+      </div>
+      <div class="pay-card">
+        <div class="pay-icon pay-alipay">A</div>
+        <h4>支付寶 / AlipayHK</h4>
+        <p data-i18n="pay_alipay">內地支付寶及香港 AlipayHK 均可</p>
+      </div>
+      <div class="pay-card">
+        <div class="pay-icon pay-wechat">W</div>
+        <h4>微信支付 / WeChat Pay</h4>
+        <p data-i18n="pay_wechat">WeChat Pay HK 及內地錢包</p>
+      </div>
+    </div>
+    <p style="text-align:center;margin-top:22px;font-size:12.5px;color:var(--muted);" data-i18n="pay_note">* 支付網關整合由持牌支付服務商提供，PCI DSS 安全認證保障交易。</p>
+  </div>
+</section>
+
+<!-- ==================== 聯絡 ==================== -->
+<section id="contact">
+  <div class="container">
+    <div class="section-head">
+      <div class="section-label" data-i18n="contact_label">聯絡佳誠</div>
+      <h2 class="section-title" data-i18n="contact_title">告訴我們你的 IT 痛點，換一個方案試試</h2>
+      <p class="section-desc" data-i18n="contact_desc">無論是網絡升級、雲端遷移、安全評估還是 AI Agent 導入，佳誠團隊樂意先了解你的業務場景，再提供具體建議。</p>
+    </div>
+    <div class="contact-layout">
+      <div>
+        <div class="contact-info-list">
+          <div class="contact-item">
+            <div class="ci-icon">📍</div>
+            <div>
+              <div class="ci-label" data-i18n="ci_addr_l">地址 / Address</div>
+              <div class="ci-value">九龍灣宏開道15號九龍灣工業中心4樓431室<br><span style="font-size:12px;color:#8FA8C4;">ROOM 431, 4/F, KOWLOON BAY IND'L CENTRE, 15 WANG HOI ROAD, KOWLOON BAY, KOWLOON</span></div>
+            </div>
+          </div>
+          <div class="contact-item">
+            <div class="ci-icon">📞</div>
+            <div>
+              <div class="ci-label" data-i18n="ci_tel_l">電話 / Tel</div>
+              <div class="ci-value"><a href="tel:+85228668716">(852) 2866 8716</a></div>
+            </div>
+          </div>
+          <div class="contact-item">
+            <div class="ci-icon">📠</div>
+            <div>
+              <div class="ci-label" data-i18n="ci_fax_l">傳真 / Fax</div>
+              <div class="ci-value">(852) 2354 9388</div>
+            </div>
+          </div>
+          <div class="contact-item">
+            <div class="ci-icon">💬</div>
+            <div>
+              <div class="ci-label">WhatsApp / WeChat</div>
+              <div class="ci-value"><a href="https://wa.me/85293681251" target="_blank">(852) 9368 1251</a></div>
+            </div>
+          </div>
+          <div class="contact-item">
+            <div class="ci-icon">🛒</div>
+            <div>
+              <div class="ci-label" data-i18n="ci_sales_l">銷售電話 / Sales</div>
+              <div class="ci-value"><a href="tel:+85281002638">(852) 8100 2638</a></div>
+            </div>
+          </div>
+          <div class="contact-item">
+            <div class="ci-icon">✉</div>
+            <div>
+              <div class="ci-label">E-mail</div>
+              <div class="ci-value"><a href="mailto:info@greatsmart.com.hk">info@greatsmart.com.hk</a></div>
+            </div>
+          </div>
+          <div class="contact-item">
+            <div class="ci-icon">🌐</div>
+            <div>
+              <div class="ci-label">Website</div>
+              <div class="ci-value"><a href="https://www.greatsmart.com.hk" target="_blank">www.greatsmart.com.hk</a></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <form class="contact-form" onsubmit="event.preventDefault(); this.querySelector('.form-submit').textContent='✓ 已送出，佳誠團隊將盡快聯絡你'; this.querySelector('.form-submit').style.background='#00E0BB';">
+        <h3 data-i18n="form_title">免費諮詢 / 預約評估</h3>
+        <p class="cf-sub" data-i18n="form_sub">填寫以下資料，我們會在 1 個工作天內回覆。</p>
+        <div class="form-row">
+          <div class="form-group"><label data-i18n="form_name">聯絡人姓名 *</label><input type="text" required placeholder="陳先生 / Ms. Lee"></div>
+          <div class="form-group"><label data-i18n="form_company">公司名稱</label><input type="text" placeholder="Your Company Ltd."></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label data-i18n="form_phone">電話 *</label><input type="tel" required placeholder="(852) XXXX XXXX"></div>
+          <div class="form-group"><label data-i18n="form_email">電郵 *</label><input type="email" required placeholder="name@company.com"></div>
+        </div>
+        <div class="form-group" style="margin-bottom:14px;">
+          <label data-i18n="form_interest">有興趣的服務</label>
+          <select>
+            <option data-i18n="form_opt1">網絡工程 / 結構化佈線</option>
+            <option data-i18n="form_opt2">雲端方案 / 混合架構</option>
+            <option data-i18n="form_opt3">網絡安全 / 合規</option>
+            <option data-i18n="form_opt4">AI Agent / 智能客服</option>
+            <option data-i18n="form_opt5">IT 外判 / Helpdesk</option>
+            <option data-i18n="form_opt6">其他 / 綜合評估</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin-bottom:16px;">
+          <label data-i18n="form_msg">簡述需求</label>
+          <textarea placeholder="例如：現有網絡經常斷線、想了解 AI 客服導入流程、需要搬遷伺服器⋯"></textarea>
+        </div>
+        <button type="submit" class="form-submit" data-i18n="form_btn">送出諮詢 →</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== Footer ==================== -->
+<footer>
+  <div class="container">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <div class="fb-name">佳誠電腦系統公司</div>
+        <div class="fb-sub">Great Smart Computer System Company · Since 1998</div>
+      </div>
+      <div class="footer-links">
+        <a href="#about" data-i18n="nav_about">關於佳誠</a>
+        <a href="#services" data-i18n="nav_services">服務方案</a>
+        <a href="#ai-agent">AI Agent</a>
+        <a href="#payments" data-i18n="nav_payments">支付方式</a>
+        <a href="#contact" data-i18n="nav_cta">免費諮詢</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 1998–2026 佳誠電腦系統公司 Great Smart Computer System Company. All rights reserved.</span>
+      <span data-i18n="footer_note">香港九龍灣宏開道15號九龍灣工業中心4樓431室</span>
+    </div>
+  </div>
+</footer>
+
+<!-- ==================== AI Chat Widget ==================== -->
+<button class="ai-chat-fab" id="aiFab" aria-label="AI Agent">🤖</button>
+<div class="ai-chat-panel" id="aiPanel">
+  <div class="acp-head">
+    <div class="ach-left">
+      <div class="acp-avatar">GS</div>
+      <div>
+        <h4 data-i18n="chat_title">佳誠 AI Agent</h4>
+        <div class="acp-status"><span class="s-dot"></span> <span data-i18n="chat_online">線上 · 即時回覆</span></div>
+      </div>
+    </div>
+    <button class="acp-close" id="aiClose">×</button>
+  </div>
+  <div class="acp-body" id="chatBody">
+    <div class="acp-msg bot" data-i18n="chat_welcome">你好！我是佳誠 AI Agent。我可以幫你了解服務方案、預約諮詢，或轉接真人同事。請問有咩可以幫到你？</div>
+  </div>
+  <div class="acp-quick" id="quickReplies">
+    <button data-q="網絡工程">網絡工程</button>
+    <button data-q="AI Agent">AI Agent</button>
+    <button data-q="預約諮詢">預約諮詢</button>
+    <button data-q="轉真人">轉真人</button>
+  </div>
+  <div class="acp-input-row">
+    <input type="text" id="chatInput" placeholder="輸入你的問題⋯" data-i18n-placeholder="chat_placeholder">
+    <button id="chatSend">➤</button>
+  </div>
+</div>
+
+<script>
+/* ==================== 多語言切換 ==================== */
+const translations = {
+  'zh-Hant': {
+    nav_about: '關於佳誠', nav_services: '服務方案', nav_animation: '科技動能', nav_ai: 'AI Agent', nav_payments: '支付方式', nav_cta: '免費諮詢',
+    hero_badge: '1998 年成立 · 香港自置客戶服務中心 · 全方位 SI 夥伴',
+    hero_title: '連接通向智能未來的<br><span>全方位 IT 方案</span>',
+    hero_sub: '佳誠電腦系統公司自 1998 年扎根九龍灣，為香港企業提供網絡工程、雲端轉型、網絡安全、AI Agent 客服與一站式 IT 外判支援。從 SI 到 Smart，我們讓科技真正驅動業務。',
+    hero_cta1: '探索服務方案 →', hero_cta2: '預約免費評估',
+    stat_year: '成立年份', stat_exp: '年 IT 行業經驗', stat_client: '企業客戶信賴', stat_support: 'AI + 真人支援',
+    about_label: '關於佳誠', about_title: '從系統整合到智能驅動，27 年堅持同一件事',
+    about_desc: '佳誠電腦系統公司成立於 1998 年，是香港本地少數同時具備網絡基建、雲端方案、資訊安全與 AI 應用整合能力的全方位 SI 供應商。我們以九龍灣為基地，服務遍及零售、物流、專業服務、教育與中小企，始終堅持「先理解業務，再交付科技」。',
+    about_tag: 'Since 1998 · 香港',
+    about_p1_t: '自置客戶服務中心', about_p1_d: '九龍灣宏開道據點，設備展示、測試與客戶支援一站式進行。',
+    about_p2_t: '跨領域認證工程團隊', about_p2_d: '網絡、雲端、安全與 AI 工程師協同作業，避免多頭供應商碎片化。',
+    about_p3_t: 'AI Agent 落地能力', about_p3_d: '不只賣工具，更協助企業梳理知識庫、設定 AI 邊界與人工接手流程。',
+    serv_label: '服務方案', serv_title: '全方位 IT 服務，覆蓋企業每一個技術斷點',
+    serv_desc: '由底層網絡到前端智能應用，佳誠以模組化方式交付，企業可按需起點，逐步擴展。',
+    s1_t: '網絡工程與結構化佈線', s1_d: '企業 LAN/WAN、Wi-Fi 6/7 部署、光纖與 Cat6A 佈線、多站點 VPN 互聯，從設計到認證測試一站式交付。', s1_tag: 'Cisco · H3C · Ubiquiti',
+    s2_t: '雲端方案與混合架構', s2_d: 'Microsoft 365、Azure、AWS 遷移與治理，混合雲備份、災難復原與成本優化，讓雲端真正可控。', s2_tag: 'Azure · AWS · M365',
+    s3_t: '網絡安全與合規', s3_d: '防火牆、端點防護、電郵安全、滲透測試與 ISO 27001 合規輔導，為企業建立縱深防禦。', s3_tag: 'Fortinet · Sophos · ISO 27001',
+    s4_t: '伺服器與企業儲存', s4_d: 'Windows Server、Linux、NAS/SAN 規劃，虛擬化與超融合架構，高效能儲存滿足業務增長。', s4_tag: 'VMware · Synology · Dell',
+    s5_t: 'IT 外判與 Helpdesk', s5_d: '按用戶數或設備數計費的月費支援，遠端 + 到場混合模式，讓中小企擁有企業級 IT 部門。', s5_tag: '月費計劃 · 遠端 + 到場',
+    s6_t: 'AI Agent 客服與流程自動化', s6_d: '整合網站、WhatsApp 與知識庫，AI 先答常見問題，複雜個案連對話記錄轉真人，實現 24/7 智能應對。', s6_tag: 'GPTBots · API 整合 · 多渠道',
+    anim_label: '科技動能', anim_title: '15 組科技動畫，讓系統的「運轉感」被看見',
+    anim_desc: '從數據流動、安全掃描到 AI 脈衝，每個動畫都對應佳誠方案中的一個真實能力維度。',
+    a1: 'AI 脈衝核心', a1d: '智能運算持續活躍', a2: '數據流光', a2d: '網絡封包高速傳輸', a3: '系統負載', a3d: '運算資源循環調度',
+    a4: '雲端軌道', a4d: '多雲節點環繞協同', a5: '效能監測', a5d: '即時資源使用率', a6: '網格覺醒', a6d: '網絡節點逐一連通',
+    a7: '安全掃描', a7d: '威脅偵測不間斷', a8: '多點連線', a8d: '跨裝置同步在線', a9: '形態轉換', a9d: '靈活架構隨需而變',
+    a10: '訊號波形', a10d: '網絡健康即時反饋', a11: '智能輸入', a11d: 'AI 對話即時響應', a12: '雲端浮動', a12d: '資源彈性伸縮',
+    a13: '雷達偵測', a13d: '異常行為持續掃描', a14: '安全護盾', a14d: '縱深防禦持續在線', a15: '混合雲層', a15d: '公有雲 + 私有雲協作',
+    ai_label: 'AI Agent 整合', ai_title: '不只是聊天機械人，而是真正能接住業務的 AI 同事',
+    ai_desc: '佳誠將 AI Agent 接入企業網站、WhatsApp 與知識庫，處理常見查詢、分流複雜個案、記錄對話上下文，並在需要時無縫轉交真人。香港中小企可按低風險場景起步，逐步擴展。',
+    ai_f1_t: '多渠道統一接入', ai_f1_d: '網站聊天、WhatsApp、WeChat 消息統一後台管理，不遺漏任何查詢。',
+    ai_f2_t: '知識庫 + API 深度整合', ai_f2_d: '讀取產品資料、訂單狀態與內部文件，AI 回答有依據、可追溯。',
+    ai_f3_t: '權限與安全邊界', ai_f3_d: '按角色設定 AI 可讀取的數據範圍，個人信息傳入模型前匿名化處理。',
+    ai_f4_t: '無縫轉真人', ai_f4_d: '複雜或不滿個案連同完整對話記錄轉交客服，客戶無需重複描述問題。',
+    ai_demo_note: '點擊右下角 <strong>AI 懸浮按鈕</strong>，即時體驗佳誠 AI Agent 的網站接待流程。',
+    pay_label: '支付方式', pay_title: '支援香港主流支付，付款流程簡單直接',
+    pay_desc: '佳誠的項目報價與服務費用支援以下支付方式，企業客戶亦可選擇銀行轉賬或月結安排。',
+    pay_octopus: '支援網上及線下拍卡付款', pay_alipay: '內地支付寶及香港 AlipayHK 均可', pay_wechat: 'WeChat Pay HK 及內地錢包',
+    pay_note: '* 支付網關整合由持牌支付服務商提供，PCI DSS 安全認證保障交易。',
+    contact_label: '聯絡佳誠', contact_title: '告訴我們你的 IT 痛點，換一個方案試試',
+    contact_desc: '無論是網絡升級、雲端遷移、安全評估還是 AI Agent 導入，佳誠團隊樂意先了解你的業務場景，再提供具體建議。',
+    ci_addr_l: '地址 / Address', ci_tel_l: '電話 / Tel', ci_fax_l: '傳真 / Fax', ci_sales_l: '銷售電話 / Sales',
+    form_title: '免費諮詢 / 預約評估', form_sub: '填寫以下資料，我們會在 1 個工作天內回覆。',
+    form_name: '聯絡人姓名 *', form_company: '公司名稱', form_phone: '電話 *', form_email: '電郵 *',
+    form_interest: '有興趣的服務', form_opt1: '網絡工程 / 結構化佈線', form_opt2: '雲端方案 / 混合架構', form_opt3: '網絡安全 / 合規',
+    form_opt4: 'AI Agent / 智能客服', form_opt5: 'IT 外判 / Helpdesk', form_opt6: '其他 / 綜合評估',
+    form_msg: '簡述需求', form_btn: '送出諮詢 →',
+    footer_note: '香港九龍灣宏開道15號九龍灣工業中心4樓431室',
+    chat_title: '佳誠 AI Agent', chat_online: '線上 · 即時回覆',
+    chat_welcome: '你好！我是佳誠 AI Agent。我可以幫你了解服務方案、預約諮詢，或轉接真人同事。請問有咩可以幫到你？',
+    chat_placeholder: '輸入你的問題⋯'
+  },
+  'zh-Hans': {
+    nav_about: '关于佳诚', nav_services: '服务方案', nav_animation: '科技动能', nav_ai: 'AI Agent', nav_payments: '支付方式', nav_cta: '免费咨询',
+    hero_badge: '1998 年成立 · 香港自置客户服务中心 · 全方位 SI 伙伴',
+    hero_title: '连接通向智能未来的<br><span>全方位 IT 方案</span>',
+    hero_sub: '佳诚电脑系统公司自 1998 年扎根九龙湾，为香港企业提供网络工程、云端转型、网络安全、AI Agent 客服与一站式 IT 外判支援。从 SI 到 Smart，我们让科技真正驱动业务。',
+    hero_cta1: '探索服务方案 →', hero_cta2: '预约免费评估',
+    stat_year: '成立年份', stat_exp: '年 IT 行业经验', stat_client: '企业客户信赖', stat_support: 'AI + 真人支援',
+    about_label: '关于佳诚', about_title: '从系统整合到智能驱动，27 年坚持同一件事',
+    about_desc: '佳诚电脑系统公司成立于 1998 年，是香港本地少数同时具备网络基建、云端方案、资讯安全与 AI 应用整合能力的全方位 SI 供应商。我们以九龙湾为基地，服务遍及零售、物流、专业服务、教育与中小企，始终坚持「先理解业务，再交付科技」。',
+    about_tag: 'Since 1998 · 香港',
+    about_p1_t: '自置客户服务中心', about_p1_d: '九龙湾宏开道据点，设备展示、测试与客户支援一站式进行。',
+    about_p2_t: '跨领域认证工程团队', about_p2_d: '网络、云端、安全与 AI 工程师协同作业，避免多头供应商碎片化。',
+    about_p3_t: 'AI Agent 落地能力', about_p3_d: '不只卖工具，更协助企业梳理知识库、设定 AI 边界与人工接手流程。',
+    serv_label: '服务方案', serv_title: '全方位 IT 服务，覆盖企业每一个技术断点',
+    serv_desc: '由底层网络到前端智能应用，佳诚以模组化方式交付，企业可按需起点，逐步扩展。',
+    s1_t: '网络工程与结构化布线', s1_d: '企业 LAN/WAN、Wi-Fi 6/7 部署、光纤与 Cat6A 布线、多站点 VPN 互联，从设计到认证测试一站式交付。', s1_tag: 'Cisco · H3C · Ubiquiti',
+    s2_t: '云端方案与混合架构', s2_d: 'Microsoft 365、Azure、AWS 迁移与治理，混合云备份、灾难复原与成本优化，让云端真正可控。', s2_tag: 'Azure · AWS · M365',
+    s3_t: '网络安全与合规', s3_d: '防火墙、端点防护、电邮安全、渗透测试与 ISO 27001 合规辅导，为企业建立纵深防御。', s3_tag: 'Fortinet · Sophos · ISO 27001',
+    s4_t: '服务器与企业存储', s4_d: 'Windows Server、Linux、NAS/SAN 规划，虚拟化与超融合架构，高效能存储满足业务增长。', s4_tag: 'VMware · Synology · Dell',
+    s5_t: 'IT 外判与 Helpdesk', s5_d: '按用户数或设备数计费的月费支援，远端 + 到场混合模式，让中小企拥有企业级 IT 部门。', s5_tag: '月费计划 · 远端 + 到场',
+    s6_t: 'AI Agent 客服与流程自动化', s6_d: '整合网站、WhatsApp 与知识库，AI 先答常见问题，复杂个案连对话记录转真人，实现 24/7 智能应对。', s6_tag: 'GPTBots · API 整合 · 多渠道',
+    anim_label: '科技动能', anim_title: '15 组科技动画，让系统的「运转感」被看见',
+    anim_desc: '从数据流动、安全扫描到 AI 脉冲，每个动画都对应佳诚方案中的一个真实能力维度。',
+    a1: 'AI 脉冲核心', a1d: '智能运算持续活跃', a2: '数据流光', a2d: '网络封包高速传输', a3: '系统负载', a3d: '运算资源循环调度',
+    a4: '云端轨道', a4d: '多云节点环绕协同', a5: '效能监测', a5d: '即时资源使用率', a6: '网格觉醒', a6d: '网络节点逐一连通',
+    a7: '安全扫描', a7d: '威胁侦测不间断', a8: '多点连线', a8d: '跨装置同步在线', a9: '形态转换', a9d: '灵活架构随需而变',
+    a10: '讯号波形', a10d: '网络健康即时反馈', a11: '智能输入', a11d: 'AI 对话即时响应', a12: '云端浮动', a12d: '资源弹性伸缩',
+    a13: '雷达侦测', a13d: '异常行为持续扫描', a14: '安全护盾', a14d: '纵深防御持续在线', a15: '混合云层', a15d: '公有云 + 私有云协作',
+    ai_label: 'AI Agent 整合', ai_title: '不只是聊天机器人，而是真正能接住业务的 AI 同事',
+    ai_desc: '佳诚将 AI Agent 接入企业网站、WhatsApp 与知识库，处理常见查询、分流复杂个案、记录对话上下文，并在需要时无缝转交真人。香港中小企可按低风险场景起步，逐步扩展。',
+    ai_f1_t: '多渠道统一接入', ai_f1_d: '网站聊天、WhatsApp、WeChat 消息统一后台管理，不遗漏任何查询。',
+    ai_f2_t: '知识库 + API 深度整合', ai_f2_d: '读取产品资料、订单状态与内部文件，AI 回答有依据、可追溯。',
+    ai_f3_t: '权限与安全边界', ai_f3_d: '按角色设定 AI 可读取的数据范围，个人信息传入模型前匿名化处理。',
+    ai_f4_t: '无缝转真人', ai_f4_d: '复杂或不满个案连同完整对话记录转交客服，客户无需重复描述问题。',
+    ai_demo_note: '点击右下角 <strong>AI 悬浮按钮</strong>，即时体验佳诚 AI Agent 的网站接待流程。',
+    pay_label: '支付方式', pay_title: '支援香港主流支付，付款流程简单直接',
+    pay_desc: '佳诚的项目报价与服务费用支援以下支付方式，企业客户亦可选择银行转账或月结安排。',
+    pay_octopus: '支援网上及线下拍卡付款', pay_alipay: '内地支付宝及香港 AlipayHK 均可', pay_wechat: 'WeChat Pay HK 及内地钱包',
+    pay_note: '* 支付网关整合由持牌支付服务商提供，PCI DSS 安全认证保障交易。',
+    contact_label: '联络佳诚', contact_title: '告诉我们你的 IT 痛点，换一个方案试试',
+    contact_desc: '无论是网络升级、云端迁移、安全评估还是 AI Agent 导入，佳诚团队乐意先了解你的业务场景，再提供具体建议。',
+    ci_addr_l: '地址 / Address', ci_tel_l: '电话 / Tel', ci_fax_l: '传真 / Fax', ci_sales_l: '销售电话 / Sales',
+    form_title: '免费咨询 / 预约评估', form_sub: '填写以下资料，我们会在 1 个工作天内回复。',
+    form_name: '联络人姓名 *', form_company: '公司名称', form_phone: '电话 *', form_email: '电邮 *',
+    form_interest: '有兴趣的服务', form_opt1: '网络工程 / 结构化布线', form_opt2: '云端方案 / 混合架构', form_opt3: '网络安全 / 合规',
+    form_opt4: 'AI Agent / 智能客服', form_opt5: 'IT 外判 / Helpdesk', form_opt6: '其他 / 综合评估',
+    form_msg: '简述需求', form_btn: '送出咨询 →',
+    footer_note: '香港九龙湾宏开道15号九龙湾工业中心4楼431室',
+    chat_title: '佳诚 AI Agent', chat_online: '线上 · 即时回复',
+    chat_welcome: '你好！我是佳诚 AI Agent。我可以帮你了解服务方案、预约咨询，或转接真人同事。请问有咩可以帮到你？',
+    chat_placeholder: '输入你的问题⋯'
+  },
+  'en': {
+    nav_about: 'About', nav_services: 'Services', nav_animation: 'Tech Motion', nav_ai: 'AI Agent', nav_payments: 'Payments', nav_cta: 'Free Consultation',
+    hero_badge: 'Est. 1998 · Owned Service Centre in HK · Full-Spectrum SI Partner',
+    hero_title: 'Connecting to an Intelligent Future<br><span>Full-Spectrum IT Solutions</span>',
+    hero_sub: 'Since 1998, Great Smart Computer System has been a trusted SI partner in Kowloon Bay, delivering networking, cloud transformation, cybersecurity, AI Agent customer service, and one-stop IT outsourcing for Hong Kong businesses. From SI to Smart — technology that truly drives business.',
+    hero_cta1: 'Explore Solutions →', hero_cta2: 'Book Free Assessment',
+    stat_year: 'Founded', stat_exp: 'Years in IT', stat_client: 'Enterprise Clients', stat_support: 'AI + Human Support',
+    about_label: 'About Great Smart', about_title: 'From System Integration to Intelligence — 27 Years of Doing One Thing Right',
+    about_desc: 'Founded in 1998, Great Smart Computer System is one of the few full-spectrum SI providers in Hong Kong with in-house capabilities across network infrastructure, cloud, cybersecurity, and AI integration. Based in Kowloon Bay, we serve retail, logistics, professional services, education, and SMEs — always starting with understanding the business before delivering the technology.',
+    about_tag: 'Since 1998 · Hong Kong',
+    about_p1_t: 'Owned Customer Service Centre', about_p1_d: 'Kowloon Bay facility for equipment demos, testing, and client support — all under one roof.',
+    about_p2_t: 'Cross-Disciplinary Certified Engineers', about_p2_d: 'Network, cloud, security, and AI engineers collaborate to eliminate fragmented multi-vendor setups.',
+    about_p3_t: 'AI Agent Deployment Capability', about_p3_d: 'We don’t just sell tools — we help structure knowledge bases, define AI boundaries, and design human handover workflows.',
+    serv_label: 'Services', serv_title: 'Full-Spectrum IT Services Covering Every Technical Gap',
+    serv_desc: 'From underlying network to front-end intelligent applications, Great Smart delivers in modular form — start where you need, scale as you grow.',
+    s1_t: 'Network Engineering & Structured Cabling', s1_d: 'Enterprise LAN/WAN, Wi-Fi 6/7 deployment, fibre and Cat6A cabling, multi-site VPN — from design to certified testing.', s1_tag: 'Cisco · H3C · Ubiquiti',
+    s2_t: 'Cloud Solutions & Hybrid Architecture', s2_d: 'Microsoft 365, Azure, AWS migration and governance, hybrid cloud backup, disaster recovery, and cost optimisation.', s2_tag: 'Azure · AWS · M365',
+    s3_t: 'Cybersecurity & Compliance', s3_d: 'Firewall, endpoint protection, email security, penetration testing, and ISO 27001 compliance advisory for defence-in-depth.', s3_tag: 'Fortinet · Sophos · ISO 27001',
+    s4_t: 'Servers & Enterprise Storage', s4_d: 'Windows Server, Linux, NAS/SAN planning, virtualisation, and hyper-converged infrastructure for high-performance storage.', s4_tag: 'VMware · Synology · Dell',
+    s5_t: 'IT Outsourcing & Helpdesk', s5_d: 'Per-user or per-device monthly support with hybrid remote + on-site delivery — enterprise-grade IT for SMEs.', s5_tag: 'Monthly Plans · Remote + On-site',
+    s6_t: 'AI Agent Customer Service & Automation', s6_d: 'Integrate website, WhatsApp, and knowledge base — AI handles FAQs, complex cases transfer to humans with full context, enabling 24/7 intelligent response.', s6_tag: 'GPTBots · API Integration · Omni-channel',
+    anim_label: 'Tech Motion', anim_title: '15 Tech Animations That Make System Motion Visible',
+    anim_desc: 'From data flow and security scanning to AI pulses — each animation maps to a real capability dimension in Great Smart solutions.',
+    a1: 'AI Pulse Core', a1d: 'Intelligent computing stays active', a2: 'Data Stream', a2d: 'High-speed packet transmission', a3: 'System Load', a3d: 'Cyclic compute resource scheduling',
+    a4: 'Cloud Orbit', a4d: 'Multi-cloud nodes in synergy', a5: 'Performance Monitor', a5d: 'Real-time utilisation', a6: 'Grid Awakening', a6d: 'Network nodes connecting one by one',
+    a7: 'Security Scan', a7d: 'Continuous threat detection', a8: 'Multi-Point Link', a8d: 'Cross-device synchronisation', a9: 'Morphing', a9d: 'Flexible architecture on demand',
+    a10: 'Signal Waveform', a10d: 'Real-time network health feedback', a11: 'Smart Input', a11d: 'Instant AI conversation response', a12: 'Cloud Float', a12d: 'Elastic resource scaling',
+    a13: 'Radar Detection', a13d: 'Continuous anomaly scanning', a14: 'Security Shield', a14d: 'Defence-in-depth always on', a15: 'Hybrid Cloud Layer', a15d: 'Public + private cloud collaboration',
+    ai_label: 'AI Agent Integration', ai_title: 'Not Just a Chatbot — an AI Teammate That Actually Handles Business',
+    ai_desc: 'Great Smart integrates AI Agents into your website, WhatsApp, and knowledge base to handle common queries, triage complex cases, retain conversation context, and seamlessly hand over to humans when needed. Hong Kong SMEs can start with low-risk scenarios and scale gradually.',
+    ai_f1_t: 'Omni-channel Unified Intake', ai_f1_d: 'Website chat, WhatsApp, and WeChat messages managed in one backend — no inquiry left behind.',
+    ai_f2_t: 'Knowledge Base + Deep API Integration', ai_f2_d: 'Reads product data, order status, and internal documents — AI answers are grounded and traceable.',
+    ai_f3_t: 'Permissions & Security Boundaries', ai_f3_d: 'Role-based data access for AI; personal information anonymised before model input.',
+    ai_f4_t: 'Seamless Human Handover', ai_f4_d: 'Complex or dissatisfied cases transfer to agents with full conversation history — no repetition for the customer.',
+    ai_demo_note: 'Click the <strong>AI floating button</strong> at bottom-right to experience Great Smart AI Agent in action.',
+    pay_label: 'Payments', pay_title: 'Supporting Major Hong Kong Payment Methods',
+    pay_desc: 'Great Smart accepts the following payment methods for project quotations and service fees. Corporate clients may also arrange bank transfer or monthly billing.',
+    pay_octopus: 'Online and offline tap-to-pay', pay_alipay: 'Mainland Alipay and AlipayHK', pay_wechat: 'WeChat Pay HK and mainland wallets',
+    pay_note: '* Payment gateway integration provided by licensed PSPs with PCI DSS certification.',
+    contact_label: 'Contact Us', contact_title: 'Tell Us Your IT Pain Point — Let’s Try a Different Approach',
+    contact_desc: 'Whether it’s network upgrade, cloud migration, security assessment, or AI Agent adoption, the Great Smart team is happy to understand your business scenario first and then offer concrete advice.',
+    ci_addr_l: 'Address', ci_tel_l: 'Tel', ci_fax_l: 'Fax', ci_sales_l: 'Sales Hotline',
+    form_title: 'Free Consultation / Book Assessment', form_sub: 'Fill in the form below — we’ll reply within 1 business day.',
+    form_name: 'Contact Name *', form_company: 'Company Name', form_phone: 'Phone *', form_email: 'Email *',
+    form_interest: 'Service of Interest', form_opt1: 'Network / Structured Cabling', form_opt2: 'Cloud / Hybrid Architecture', form_opt3: 'Cybersecurity / Compliance',
+    form_opt4: 'AI Agent / Smart Customer Service', form_opt5: 'IT Outsourcing / Helpdesk', form_opt6: 'Other / Holistic Assessment',
+    form_msg: 'Briefly Describe Your Needs', form_btn: 'Send Enquiry →',
+    footer_note: 'Room 431, 4/F, Kowloon Bay Industrial Centre, 15 Wang Hoi Road, Kowloon Bay, Kowloon, Hong Kong',
+    chat_title: 'Great Smart AI Agent', chat_online: 'Online · Instant Reply',
+    chat_welcome: 'Hi! I’m the Great Smart AI Agent. I can help you explore our services, book a consultation, or connect you with a human colleague. How can I assist?',
+    chat_placeholder: 'Type your question⋯'
+  },
+  'ja': {
+    nav_about: '会社概要', nav_services: 'サービス', nav_animation: 'テックモーション', nav_ai: 'AIエージェント', nav_payments: 'お支払い', nav_cta: '無料相談',
+    hero_badge: '1998年設立 · 香港自社サービスセンター · 総合SIパートナー',
+    hero_title: 'インテリジェントな未来へつなぐ<br><span>総合ITソリューション</span>',
+    hero_sub: 'Great Smart Computer Systemは1998年以来、九龍灣を拠点に、ネットワーク構築、クラウド移行、サイバーセキュリティ、AIエージェントカスタマーサービス、ITアウトソーシングを香港企業に提供してきました。SIからSmartへ — テクノロジーでビジネスを真に動かします。',
+    hero_cta1: 'ソリューションを見る →', hero_cta2: '無料評価を予約',
+    stat_year: '設立', stat_exp: '年のIT経験', stat_client: '企業クライアント', stat_support: 'AI + 有人サポート',
+    about_label: '会社概要', about_title: 'システム統合からインテリジェンスへ — 27年間一つのことを貫く',
+    about_desc: 'Great Smart Computer Systemは1998年設立。香港で数少ない、ネットワークインフラ、クラウド、サイバーセキュリティ、AI統合の社内能力をすべて備えた総合SIプロバイダーです。九龍灣を拠点に、小売、物流、専門サービス、教育、中小企業にサービスを提供し、「ビジネスを理解してからテクノロジーを届ける」という姿勢を貫いています。',
+    about_tag: 'Since 1998 · 香港',
+    about_p1_t: '自社カスタマーサービスセンター', about_p1_d: '九龍灣の拠点で、機器展示、テスト、顧客サポートをワンストップで提供。',
+    about_p2_t: '分野横断の認定エンジニアチーム', about_p2_d: 'ネットワーク、クラウド、セキュリティ、AIエンジニアが協働し、マルチベンダーによる分断を排除。',
+    about_p3_t: 'AIエージェント導入能力', about_p3_d: 'ツール販売だけでなく、ナレッジベースの整理、AIの境界設定、有人引き継ぎフローの設計まで支援。',
+    serv_label: 'サービス', serv_title: 'あらゆる技術的ギャップをカバーする総合ITサービス',
+    serv_desc: '基盤ネットワークからフロントエンドのインテリジェントアプリケーションまで、モジュール方式で提供。必要なところから始め、成長に合わせて拡張できます。',
+    s1_t: 'ネットワーク構築・構造化配線', s1_d: '企業LAN/WAN、Wi-Fi 6/7導入、光ファイバーおよびCat6A配線、マルチサイトVPN — 設計から認証テストまで一貫提供。', s1_tag: 'Cisco · H3C · Ubiquiti',
+    s2_t: 'クラウドソリューション・ハイブリッドアーキテクチャ', s2_d: 'Microsoft 365、Azure、AWSの移行とガバナンス、ハイブリッドクラウドバックアップ、災害復旧、コスト最適化。', s2_tag: 'Azure · AWS · M365',
+    s3_t: 'サイバーセキュリティ・コンプライアンス', s3_d: 'ファイアウォール、エンドポイント保護、メールセキュリティ、ペネトレーションテスト、ISO 27001準拠支援による多層防御。', s3_tag: 'Fortinet · Sophos · ISO 27001',
+    s4_t: 'サーバー・エンタープライズストレージ', s4_d: 'Windows Server、Linux、NAS/SAN計画、仮想化、ハイパーコンバージドインフラによる高性能ストレージ。', s4_tag: 'VMware · Synology · Dell',
+    s5_t: 'ITアウトソーシング・ヘルプデスク', s5_d: 'ユーザー数またはデバイス数単位の月額サポート。リモート＋オンサイトのハイブリッド提供で、中小企業にエンタープライズ級ITを。', s5_tag: '月額プラン · リモート + オンサイト',
+    s6_t: 'AIエージェントカスタマーサービス・自動化', s6_d: 'Webサイト、WhatsApp、ナレッジベースを統合。AIがFAQを処理し、複雑なケースは会話コンテキストとともに有人へ引き継ぎ、24時間365日のインテリジェント対応を実現。', s6_tag: 'GPTBots · API統合 · オムニチャネル',
+    anim_label: 'テックモーション', anim_title: 'システムの「稼働感」を可視化する15のテックアニメーション',
+    anim_desc: 'データフロー、セキュリティスキャン、AIパルスまで — 各アニメーションはGreat Smartソリューションの実際の能力軸に対応しています。',
+    a1: 'AIパルスコア', a1d: 'インテリジェント演算が常時稼働', a2: 'データストリーム', a2d: 'パケットの高速伝送', a3: 'システム負荷', a3d: '演算リソースの循環スケジューリング',
+    a4: 'クラウドオービット', a4d: 'マルチクラウドノードの協調', a5: 'パフォーマンス監視', a5d: 'リアルタイムリソース使用率', a6: 'グリッド覚醒', a6d: 'ネットワークノードが順次接続',
+    a7: 'セキュリティスキャン', a7d: '脅威検知を継続実行', a8: 'マルチポイント接続', a8d: 'デバイス間の同期オンライン', a9: 'モーフィング', a9d: '柔軟なアーキテクチャがオンデマンドで変化',
+    a10: 'シグナル波形', a10d: 'ネットワーク健全性のリアルタイムフィードバック', a11: 'スマート入力', a11d: 'AI対話の即時応答', a12: 'クラウドフロート', a12d: 'リソースの弾力的な伸縮',
+    a13: 'レーダー検知', a13d: '異常行動を継続スキャン', a14: 'セキュリティシールド', a14d: '多層防御を常時稼働', a15: 'ハイブリッドクラウド層', a15d: 'パブリック＋プライベートクラウドの連携',
+    ai_label: 'AIエージェント統合', ai_title: '単なるチャットボットではない — ビジネスを実際に担うAIチームメイト',
+    ai_desc: 'Great SmartはAIエージェントをWebサイト、WhatsApp、ナレッジベースに統合し、よくある問い合わせの処理、複雑なケースのトリアージ、会話コンテキストの保持、必要に応じた有人へのシームレスな引き継ぎを実現します。香港の中小企業は低リスクなシナリオから始め、段階的に拡張できます。',
+    ai_f1_t: 'オムニチャネル統合受付', ai_f1_d: 'Webチャット、WhatsApp、WeChatのメッセージを一元管理 — 問い合わせを逃しません。',
+    ai_f2_t: 'ナレッジベース + 深いAPI統合', ai_f2_d: '製品データ、注文状況、社内文書を読み取り、根拠のある追跡可能なAI回答を実現。',
+    ai_f3_t: '権限とセキュリティ境界', ai_f3_d: '役割ベースのデータアクセス制御。個人情報はモデル入力前に匿名化。',
+    ai_f4_t: 'シームレスな有人引き継ぎ', ai_f4_d: '複雑または不満のあるケースは会話履歴とともに担当者へ — お客様に再説明の負担なし。',
+    ai_demo_note: '右下の<strong>AIフローティングボタン</strong>をクリックして、Great Smart AIエージェントの受付フローを体験してください。',
+    pay_label: 'お支払い', pay_title: '香港の主要決済方法に対応',
+    pay_desc: 'Great Smartのプロジェクト見積もりおよびサービス料金は以下の決済方法に対応しています。法人のお客様は銀行振込または月次請求もご利用いただけます。',
+    pay_octopus: 'オンライン・オフラインのタッチ決済', pay_alipay: '中国本土AlipayおよびAlipayHK', pay_wechat: 'WeChat Pay HKおよび中国本土ウォレット',
+    pay_note: '* 決済ゲートウェイ統合はPCI DSS認証取得のライセンス事業者により提供されます。',
+    contact_label: 'お問い合わせ', contact_title: 'ITの課題をお聞かせください — 別のアプローチを試してみませんか',
+    contact_desc: 'ネットワーク更新、クラウド移行、セキュリティ評価、AIエージェント導入など、Great Smartチームがまずビジネスシーンを理解し、具体的な提案をいたします。',
+    ci_addr_l: '住所 / Address', ci_tel_l: '電話 / Tel', ci_fax_l: 'FAX / Fax', ci_sales_l: '営業ホットライン / Sales',
+    form_title: '無料相談 / 評価予約', form_sub: '以下のフォームにご記入ください。1営業日以内にご返信いたします。',
+    form_name: 'ご担当者名 *', form_company: '会社名', form_phone: '電話番号 *', form_email: 'メールアドレス *',
+    form_interest: 'ご興味のあるサービス', form_opt1: 'ネットワーク / 構造化配線', form_opt2: 'クラウド / ハイブリッドアーキテクチャ', form_opt3: 'サイバーセキュリティ / コンプライアンス',
+    form_opt4: 'AIエージェント / スマートカスタマーサービス', form_opt5: 'ITアウトソーシング / ヘルプデスク', form_opt6: 'その他 / 総合評価',
+    form_msg: 'ご要望の概要', form_btn: '送信する →',
+    footer_note: '香港九龍灣宏開道15号九龍灣工業中心4楼431室',
+    chat_title: 'Great Smart AIエージェント', chat_online: 'オンライン · 即時応答',
+    chat_welcome: 'こんにちは！Great Smart AIエージェントです。サービス内容のご案内、相談予約、担当者へのおつなぎが可能です。どのようなご用件でしょうか？',
+    chat_placeholder: 'ご質問を入力⋯'
+  }
+};
+
+let currentLang = 'zh-Hant';
+
+function setLanguage(lang) {
+  currentLang = lang;
+  document.documentElement.lang = lang;
+  const dict = translations[lang];
+  if (!dict) return;
+
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (dict[key]) {
+      if (key === 'hero_title' || key === 'ai_demo_note') {
+        el.innerHTML = dict[key];
+      } else {
+        el.textContent = dict[key];
+      }
+    }
+  });
+
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    const key = el.getAttribute('data-i18n-placeholder');
+    if (dict[key]) el.placeholder = dict[key];
+  });
+
+  document.querySelectorAll('.lang-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.lang === lang);
+  });
+
+  // 更新聊天機器人歡迎語（如果聊天視窗尚未有對話）
+  const chatBody = document.getElementById('chatBody');
+  if (chatBody && chatBody.children.length === 1) {
+    const welcomeEl = chatBody.querySelector('.acp-msg.bot');
+    if (welcomeEl && dict['chat_welcome']) welcomeEl.textContent = dict['chat_welcome'];
+  }
+}
+
+document.querySelectorAll('.lang-btn').forEach(btn => {
+  btn.addEventListener('click', () => setLanguage(btn.dataset.lang));
+});
+
+/* ==================== 手機導航 ==================== */
+const mobileToggle = document.getElementById('mobileToggle');
+const navLinks = document.getElementById('navLinks');
+mobileToggle.addEventListener('click', () => {
+  navLinks.classList.toggle('mobile-open');
+});
+navLinks.querySelectorAll('a').forEach(a => {
+  a.addEventListener('click', () => navLinks.classList.remove('mobile-open'));
+});
+
+/* ==================== AI Chat Widget ==================== */
+const aiFab = document.getElementById('aiFab');
+const aiPanel = document.getElementById('aiPanel');
+const aiClose = document.getElementById('aiClose');
+const chatBody = document.getElementById('chatBody');
+const chatInput = document.getElementById('chatInput');
+const chatSend = document.getElementById('chatSend');
+const quickReplies = document.getElementById('quickReplies');
+
+aiFab.addEventListener('click', () => {
+  aiPanel.classList.toggle('open');
+  if (aiPanel.classList.contains('open')) {
+    aiFab.textContent = '✕';
+    aiFab.style.background = '#0A2A5E';
+  } else {
+    aiFab.textContent = '🤖';
+    aiFab.style.background = 'linear-gradient(135deg, var(--teal), #0088CC)';
+  }
+});
+
+aiClose.addEventListener('click', () => {
+  aiPanel.classList.remove('open');
+  aiFab.textContent = '🤖';
+  aiFab.style.background = 'linear-gradient(135deg, var(--teal), #0088CC)';
+});
+
+function addMessage(text, type) {
+  const div = document.createElement('div');
+  div.className = 'acp-msg ' + type;
+  div.textContent = text;
+  chatBody.appendChild(div);
+  chatBody.scrollTop = chatBody.scrollHeight;
+}
+
+function getAIReply(userText) {
+  const t = userText.toLowerCase();
+  const lang = currentLang;
+
+  if (t.includes('網絡') || t.includes('network') || t.includes('ネットワーク')) {
+    return lang === 'en' ? 'We provide enterprise LAN/WAN design, Wi-Fi 6/7 deployment, structured cabling, and multi-site VPN. Would you like a free network assessment?' :
+           lang === 'ja' ? '企業LAN/WAN設計、Wi-Fi 6/7導入、構造化配線、マルチサイトVPNを提供しています。無料のネットワーク評価をご希望ですか？' :
+           lang === 'zh-Hans' ? '我们提供企业 LAN/WAN 设计、Wi-Fi 6/7 部署、结构化布线与多站点 VPN。需要免费网络评估吗？' :
+           '我們提供企業 LAN/WAN 設計、Wi-Fi 6/7 部署、結構化佈線與多站點 VPN。需要免費網絡評估嗎？';
+  }
+  if (t.includes('ai') || t.includes('agent') || t.includes('エージェント')) {
+    return lang === 'en' ? 'Our AI Agent integrates with your website, WhatsApp, and knowledge base to handle enquiries 24/7 and hand over to humans seamlessly. Would you like a demo?' :
+           lang === 'ja' ? 'AIエージェントはWebサイト、WhatsApp、ナレッジベースと統合し、24時間365日問い合わせに対応、有人へシームレスに引き継ぎます。デモをご希望ですか？' :
+           lang === 'zh-Hans' ? '我们的 AI Agent 可整合网站、WhatsApp 与知识库，24/7 处理查询并无缝转真人。需要预约演示吗？' :
+           '我們的 AI Agent 可整合網站、WhatsApp 與知識庫，24/7 處理查詢並無縫轉真人。需要預約演示嗎？';
+  }
+  if (t.includes('預約') || t.includes('咨詢') || t.includes('咨询') || t.includes('consult') || t.includes('相談') || t.includes('報價') || t.includes('quote')) {
+    return lang === 'en' ? 'You can fill in the consultation form on this page, or call our sales hotline at (852) 8100 2638. We’ll respond within 1 business day.' :
+           lang === 'ja' ? 'このページの相談フォームにご記入いただくか、営業ホットライン (852) 8100 2638 までお電話ください。1営業日以内にご返信いたします。' :
+           lang === 'zh-Hans' ? '您可以填写本页的咨询表单，或致电销售热线 (852) 8100 2638，我们会在 1 个工作天内回复。' :
+           '您可以填寫本頁的諮詢表單，或致電銷售熱線 (852) 8100 2638，我們會在 1 個工作天內回覆。';
+  }
+  if (t.includes('真人') || t.includes('human') || t.includes('担当') || t.includes('轉接')) {
+    return lang === 'en' ? 'Of course. Please leave your name and phone number, or WhatsApp us at (852) 9368 1251 — a colleague will follow up shortly.' :
+           lang === 'ja' ? 'かしこまりました。お名前と電話番号をお知らせいただくか、WhatsApp (852) 9368 1251 までご連絡ください。担当者より折り返しご連絡いたします。' :
+           lang === 'zh-Hans' ? '好的。请留下姓名和电话，或 WhatsApp (852) 9368 1251，同事会尽快跟进。' :
+           '好的。請留下姓名和電話，或 WhatsApp (852) 9368 1251，同事會盡快跟進。';
+  }
+  return lang === 'en' ? 'Thanks for your message! For detailed assistance, you can reach our team at (852) 2866 8716 or info@greatsmart.com.hk. You can also ask me about networking, cloud, security, or AI Agent services.' :
+         lang === 'ja' ? 'メッセージありがとうございます。詳細については (852) 2866 8716 または info@greatsmart.com.hk までお問い合わせください。ネットワーク、クラウド、セキュリティ、AIエージェントについてもお気軽にご質問ください。' :
+         lang === 'zh-Hans' ? '谢谢你的信息！如需详细协助，可致电 (852) 2866 8716 或电邮 info@greatsmart.com.hk。你也可以继续问我网络、云端、安全或 AI Agent 相关问题。' :
+         '謝謝你的信息！如需詳細協助，可致電 (852) 2866 8716 或電郵 info@greatsmart.com.hk。你也可以繼續問我網絡、雲端、安全或 AI Agent 相關問題。';
+}
+
+function sendChat() {
+  const text = chatInput.value.trim();
+  if (!text) return;
+  addMessage(text, 'user');
+  chatInput.value = '';
+  setTimeout(() => {
+    addMessage(getAIReply(text), 'bot');
+  }, 500);
+}
+
+chatSend.addEventListener('click', sendChat);
+chatInput.addEventListener('keydown', e => { if (e.key === 'Enter') sendChat(); });
+
+quickReplies.addEventListener('click', e => {
+  if (e.target.tagName === 'BUTTON') {
+    chatInput.value = e.target.dataset.q;
+    sendChat();
+  }
+});
+
+/* ==================== 平滑滾動偏移（因 sticky nav） ==================== */
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+  anchor.addEventListener('click', function(e) {
+    const targetId = this.getAttribute('href');
+    if (targetId === '#') return;
+    const target = document.querySelector(targetId);
+    if (target) {
+      e.preventDefault();
+      const offset = 80;
+      const top = target.getBoundingClientRect().top + window.pageYOffset - offset;
+      window.scrollTo({ top, behavior: 'smooth' });
+    }
+  });
+});
+
+/* ==================== 進入視口淡入（可選增強） ==================== */
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.style.opacity = '1';
+      entry.target.style.transform = 'translateY(0)';
+    }
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.service-card, .anim-tile, .about-point, .ai-feature, .pay-card').forEach(el => {
+  el.style.opacity = '0';
+  el.style.transform = 'translateY(24px)';
+  el.style.transition = 'opacity .6s ease, transform .6s ease';
+  observer.observe(el);
+});
+</script>
+
+</body>
+</html>
